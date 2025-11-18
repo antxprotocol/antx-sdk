@@ -1,0 +1,1156 @@
+syntax = "v1"
+
+info (
+	title:          "ANTX SDK"
+	desc:           "SDK for the ANTX"
+	useDefinitions: "true"
+)
+
+// =============================== Type Definitions ===============================
+// =============================== Common Types ===============================
+type (
+	// BaseResp common response
+	BaseResp {
+		Code         string                 `json:"code"`
+		Msg          string                 `json:"msg"`
+		Params       map[string]interface{} `json:"params"`
+		RequestTime  string                 `json:"requestTime"`
+		ResponseTime string                 `json:"responseTime"`
+		TraceId      string                 `json:"traceId"`
+	}
+	// PageReq pagination request
+	PageReq {
+		Key        string `form:"key,optional"` // choose either key or offset
+		Offset     string `form:"offset,optional"` // choose either key or offset
+		Limit      string `form:"limit,optional"` // default 100
+		CountTotal bool   `form:"countTotal,optional"` // whether to return total count
+		Reverse    bool   `form:"reverse,optional"` // whether to reverse order
+	}
+	// PageResp pagination response
+	PageResp {
+		NextKey string `json:"nextKey"` // next page key
+		Total   string `json:"total"` // total count
+	}
+	// IndexerPageOffsetData indexer pagination offset data
+	IndexerPageOffsetData {
+		CreateTime string `json:"createTime"` // next page offset data, creation time
+		ItemId     string `json:"itemId"` // next page offset data, itemId
+	}
+)
+
+// =============================== Agent Related ===============================
+type (
+	AgentBinding {
+		AgentAddress string `json:"agentAddress"` // Agent address
+		ChainType    int32  `json:"chainType"` // Chain type
+		ChainAddress string `json:"chainAddress"` // Chain address
+		ExpireTime   string `json:"expireTime"` // Expiration time
+	}
+)
+
+// =============================== Subaccount Related ===============================
+type (
+	Subaccount {
+		Id              string `json:"id"` // Subaccount ID, must be greater than 0
+		ChainType       int32  `json:"chainType"` // Chain type
+		ChainAddress    string `json:"chainAddress"` // Chain address
+		ClientAccountId string `json:"clientAccountId"` // Client custom ID, for idempotency check, max length 64
+		IsSystemAccount bool   `json:"isSystemAccount"` // Whether it is a system account
+		TakerFeeRatePpm uint32 `json:"takerFeeRatePpm"` // Taker fee rate, unit: parts per million
+		MakerFeeRatePpm uint32 `json:"makerFeeRatePpm"` // Maker fee rate, unit: parts per million
+		// ExchangeIdToMarginMode map[string]uint32 `json:"exchangeIdToMarginMode"` // Perpetual contract margin mode setting 0: Unknown 1: Cross 2: Isolated
+		// ExchangeIdToLeverage   map[string]uint32 `json:"exchangeIdToLeverage"` // Perpetual contract leverage setting
+		TradeSetting []TradeSetting `json:"tradeSetting"` // Perpetual contract trading settings
+	}
+	TradeSetting {
+		ExchangeId string `json:"exchangeId"` // Exchange ID
+		MarginMode uint32 `json:"marginMode"` // Margin mode 0: Unknown 1: Cross 2: Isolated
+		Leverage   uint32 `json:"leverage"` // Leverage multiplier
+	}
+	SpotAsset {
+		SubaccountId string `json:"subaccountId"` // Subaccount ID
+		CoinId       string `json:"coinId"` // Collateral coin ID
+		CoinAmount   string `json:"coinAmount"` // Collateral amount
+	}
+	FeeSetting {
+		TakerFeeRatePpm uint32 `json:"takerFeeRatePpm"` // Taker fee rate, unit: parts per million
+		MakerFeeRatePpm uint32 `json:"makerFeeRatePpm"` // Maker fee rate, unit: parts per million
+	}
+	GetAddressInfoReq {
+		Address string `form:"address"`
+	}
+	GetAddressInfoResp {
+		BaseResp
+		Data AddressInfo `json:"data"`
+	}
+	AddressInfo {
+		Exist         bool   `json:"exist"`
+		AccountNumber string `json:"accountNumber"`
+		Sequence      string `json:"sequence"`
+	}
+)
+
+// =============================== User Related ===============================
+// Trading subaccount information (distinguished from chain's own account)
+type (
+	PerpetualCollateral {
+		SubaccountId                          string `json:"subaccountId"` // Subaccount ID
+		CoinId                                string `json:"coinId"` // Collateral coin ID
+		Amount                                string `json:"amount"` // Collateral amount
+		LegacyAmount                          string `json:"legacyAmount"` // Legacy accounting balance field, display only, not used in calculations
+		CumDepositAmount                      string `json:"cumDepositAmount"` // Cumulative deposit amount
+		CumWithdrawAmount                     string `json:"cumWithdrawAmount"` // Cumulative withdrawal amount
+		CumTransferInAmount                   string `json:"cumTransferInAmount"` // Cumulative transfer-in amount
+		CumTransferOutAmount                  string `json:"cumTransferOutAmount"` // Cumulative transfer-out amount
+		CumCrossPositionOpenLongAmount        string `json:"cumCrossPositionOpenLongAmount"` // Cumulative cross position open long deducted collateral amount
+		CumCrossPositionOpenShortAmount       string `json:"cumCrossPositionOpenShortAmount"` // Cumulative cross position open short added collateral amount
+		CumCrossPositionCloseLongAmount       string `json:"cumCrossPositionCloseLongAmount"` // Cumulative cross position close long added collateral amount
+		CumCrossPositionCloseShortAmount      string `json:"cumCrossPositionCloseShortAmount"` // Cumulative cross position close short deducted collateral amount
+		CumIsolatedPositionOpenAmount         string `json:"cumIsolatedPositionOpenAmount"` // Cumulative isolated position open deducted collateral amount
+		CumIsolatedPositionCloseAmount        string `json:"cumIsolatedPositionCloseAmount"` // Cumulative isolated position close added collateral amount
+		CumIsolatedPositionMarginUpdateAmount string `json:"cumIsolatedPositionMarginUpdateAmount"` // Cumulative isolated position margin update collateral amount
+		CumPositionFundingFeeAmount           string `json:"cumPositionFundingFeeAmount"` // Cumulative position funding fee amount
+		CumFillFeeAmount                      string `json:"cumFillFeeAmount"` // Cumulative fill fee amount
+		CumLiquidateFeeAmount                 string `json:"cumLiquidateFeeAmount"` // Cumulative liquidation fee amount
+		CumFillFeeIncomeAmount                string `json:"cumFillFeeIncomeAmount"` // Cumulative order fee income amount
+		CumLiquidateFeeIncomeAmount           string `json:"cumLiquidateFeeIncomeAmount"` // Cumulative liquidation fee income amount
+		CreatedTime                           uint64 `json:"createdTime"` // Created time
+		UpdatedTime                           uint64 `json:"updatedTime"` // Updated time
+	}
+	PerpetualPosition {
+		SubaccountId             string       `json:"subaccountId"` // Subaccount ID
+		CoinId                   string       `json:"coinId"` // Collateral coin ID
+		ExchangeId               string       `json:"exchangeId"` // Exchange ID, must be perpetual contract
+		MarginMode               uint32       `json:"marginMode"` // Margin mode
+		OpenSize                 string       `json:"openSize"` // Current open size (positive for long, negative for short)
+		OpenValue                string       `json:"openValue"` // Current open value (accumulates on open, proportionally decreases on close)
+		OpenFee                  string       `json:"openFee"` // Current open fee after allocation (accumulates on open, proportionally decreases on close)
+		FundingFee               string       `json:"fundingFee"` // Current position funding fee after allocation (accumulates on settlement, proportionally decreases on close)
+		IsolatedMarginAmount     string       `json:"isolatedMarginAmount"` // Isolated margin amount, meaningful when perpetual contract is in isolated mode
+		IsolatedCollateralAmount string       `json:"isolatedCollateralAmount"` // Isolated collateral amount, meaningful when perpetual contract is in isolated mode
+		CacheFundingIndex        string       `json:"cacheFundingIndex"` // Cached funding rate index, updated when asset is updated
+		LatestFundingIndex       string       `json:"latestFundingIndex"` // Latest updated funding rate index
+		TermCount                int32        `json:"termCount"` // Long position term count, starts from 1, increments after complete close
+		LongTermStat             PositionStat `json:"longTermStat"` // Long position term cumulative statistics, cleared after complete close
+		ShortTermStat            PositionStat `json:"shortTermStat"` // Short position term cumulative statistics, cleared after complete close
+		LongTotalStat            PositionStat `json:"longTotalStat"` // Long position total cumulative statistics
+		ShortTotalStat           PositionStat `json:"shortTotalStat"` // Short position total cumulative statistics
+		CreatedTime              uint64       `json:"createdTime"` // Created time
+		UpdatedTime              uint64       `json:"updatedTime"` // Updated time
+	}
+	PositionStat {
+		CumOpenSize     string `json:"cumOpenSize"` // Current open size (positive for long, negative for short)
+		CumOpenValue    string `json:"cumOpenValue"` // Current open value (accumulates on open, proportionally decreases on close)
+		CumOpenFee      string `json:"cumOpenFee"` // Current open fee after allocation (accumulates on open, proportionally decreases on close)
+		CumCloseSize    string `json:"cumCloseSize"` // Current close size (positive for long, negative for short)
+		CumCloseValue   string `json:"cumCloseValue"` // Current close value (accumulates on close, proportionally decreases on open)
+		CumCloseFee     string `json:"cumCloseFee"` // Current close fee after allocation (accumulates on close, proportionally decreases on open)
+		CumFundingFee   string `json:"cumFundingFee"` // Current position funding fee after allocation (accumulates on settlement, proportionally decreases on close)
+		CumLiquidateFee string `json:"cumLiquidateFee"` // Current position liquidation fee after allocation (accumulates on settlement, proportionally decreases on close)
+		CreatedTime     uint64 `json:"createdTime"` // Created time
+		UpdatedTime     uint64 `json:"updatedTime"` // Updated time
+	}
+	// GetSubaccountReq get user information by ETH address request
+	GetSubaccountReq {
+		ChainType    int32  `form:"chainType"` // Chain type
+		ChainAddress string `form:"chainAddress"` // Chain address
+		AgentAddress string `form:"agentAddress"` // Agent address
+	}
+	//GetSubaccountRespData get user information by ETH address response data
+	GetSubaccountRespData {
+		SubaccountList []Subaccount `json:"subaccountList"` // Subaccount list
+		AccountNumber  string       `json:"accountNumber"` // Account number
+		Sequence       string       `json:"sequence"` // Sequence
+	}
+	// GetSubaccountResp get user information by ETH address response
+	GetSubaccountResp {
+		BaseResp
+		Data GetSubaccountRespData `json:"data,omitempty"`
+	}
+)
+
+// =============================== Trading Related ===============================
+type (
+	SendTransactionReq {
+		TypeURL       string `json:"typeUrl"` // Transaction type
+		RawTx         string `json:"rawTx"` // Transaction raw tx
+		AccountNumber uint64 `json:"accountNumber,optional"` // Account number
+	}
+	SendTransactionRespData {
+		TxHash     string `json:"txHash"` // Transaction hash
+		RawTx      string `json:"rawTx"` // Transaction raw tx
+		ResultData string `json:"resultData"` // Data
+	}
+	SendTransactionResp {
+		BaseResp
+		Data SendTransactionRespData `json:"data,omitempty"`
+	}
+	SendSyncTransactionReq {
+		TypeURL       string `json:"typeUrl"` // Transaction type
+		RawTx         string `json:"rawTx"` // Transaction raw tx
+		AccountNumber uint64 `json:"accountNumber,optional"` // Account number
+	}
+	SendSyncTransactionRespData {
+		RawTx      string             `json:"rawTx"` // Raw data
+		Block      uint64             `json:"block"` // Block height
+		Hash       string             `json:"hash"` // Transaction hash
+		From       string             `json:"from"` // Sender
+		Status     bool               `json:"status"` // Status
+		Error      interface{}        `json:"error"` // Error
+		ActionList []ExplorerTxAction `json:"action"` // Actions
+		ResultData string             `json:"resultData"` // Data
+	}
+	SendSyncTransactionResp {
+		BaseResp
+		Data SendSyncTransactionRespData `json:"data,omitempty"`
+	}
+	Coin {
+		Id                   string `json:"id,optional"` // Coin ID, range [1001, 9999], incrementally set
+		Symbol               string `json:"symbol"` // Coin symbol, max length 32, e.g., 'BTC'
+		StepSizeScale        int32  `json:"stepSizeScale"` // Decimal places for minimum unit quantity, i.e., minimum unit = 10^-step_size_scale, e.g., step_size_scale=6 means 0.000001, range [-100, 100]
+		AssetChainId         string `json:"assetChainId"` // Asset chain ID
+		AssetContractAddress string `json:"assetContractAddress"` // Asset contract address
+	}
+	Exchange {
+		Id                    string    `json:"id,optional"` // Exchange ID, must be incrementally set, spot range [100001, 109999], perpetual range [200001, 209999]
+		Symbol                string    `json:"symbol"` // Exchange symbol, e.g., BTC/USDT, BTC-USDT
+		BaseCoinId            string    `json:"baseCoinId"` // Base coin ID, e.g., BTC
+		QuoteCoinId           string    `json:"quoteCoinId"` // Quote coin ID, e.g., USDT
+		StepSizeScale         int32     `json:"stepSizeScale"` // Decimal places for minimum position unit, i.e., minimum unit = 10^-step_size_scale, e.g., step_size_scale=6 means 0.000001
+		TickSizeScale         int32     `json:"tickSizeScale"` // Decimal places for minimum price unit, i.e., minimum unit = 10^-tick_size_scale, e.g., tick_size_scale=-1 means 10
+		OrderPriceMaxRatioPpm uint32    `json:"orderPriceMaxRatioPpm"` // Maximum order price limit ratio (compared to oracle price), unit: parts per million
+		OrderPriceMinRatioPpm uint32    `json:"orderPriceMinRatioPpm"` // Minimum order price limit ratio (compared to oracle price), unit: parts per million
+		OrderSizeMax          string    `json:"orderSizeMax"` // Maximum order size
+		Perpetual             Perpetual `json:"perpetual,omitempty"` // Perpetual contract trading information
+	}
+	Perpetual {
+		SupportMarginModeList       []uint32   `json:"supportMarginModeList"` // Supported margin modes
+		RiskTierList                []RiskTier `json:"riskTierList"` // Risk tier list (must be sorted by max leverage descending, maintenance margin ratio ascending, position value ascending)
+		LiquidateFeeRatePpm         uint32     `json:"liquidateFeeRatePpm"` // Default liquidation fee rate, unit: parts per million
+		DefaultLeverage             uint32     `json:"defaultLeverage"` // Default leverage multiplier
+		EnableOrderCreate           bool       `json:"enableOrderCreate"` // Whether order creation is allowed
+		EnableOrderFill             bool       `json:"enableOrderFill"` // Whether order fill is allowed
+		EnablePositionOpen          bool       `json:"enablePositionOpen"` // Whether position opening is allowed
+		FundingInterestRatePpm      uint32     `json:"fundingInterestRatePpm"` // Funding interest rate
+		FundingImpactMarginNotional string     `json:"fundingImpactMarginNotional"` // Funding impact margin notional
+		FundingRateAbsMaxPpm        uint32     `json:"fundingRateAbsMaxPpm"` // Maximum absolute funding rate
+		FundingRateIntervalMinutes  uint32     `json:"fundingRateIntervalMinutes"` // Funding rate calculation interval
+	}
+	RiskTier {
+		MaxLeverage               uint32 `json:"maxLeverage"` // Maximum leverage multiplier
+		MaintenanceMarginRatioPpm uint32 `json:"maintenanceMarginRatioPpm"` // Maintenance margin ratio
+		PositionValueUpperBound   string `json:"positionValueUpperBound"` // Position value upper bound
+	}
+	KLine {
+		KlineId       string `json:"klineId"` // K-line ID
+		ExchangeId    string `json:"exchangeId"` // Exchange ID
+		KlineType     string `json:"klineType"` // K-line type
+		PriceType     string `json:"priceType"` // K-line price type
+		KlineTime     uint64 `json:"klineTime"` // K-line time
+		Trades        string `json:"trades"` // Number of trades
+		Size          string `json:"size"` // Volume
+		Value         string `json:"value"` // Turnover
+		High          string `json:"high"` // Highest price
+		Low           string `json:"low"` // Lowest price
+		Open          string `json:"open"` // Open price
+		Close         string `json:"close"` // Close price
+		MakerBuySize  string `json:"makerBuySize"` // Maker buy volume
+		MakerBuyValue string `json:"makerBuyValue"` // Maker buy turnover
+	}
+	// GetCoinListRespData get coin list response data
+	GetCoinListRespData {
+		CoinList []Coin `json:"coinList"` // Coin list
+	}
+	// GetCoinListReq get coin list request
+	GetCoinListReq  {}
+	// GetCoinListResp get coin list response
+	GetCoinListResp {
+		BaseResp
+		Data GetCoinListRespData `json:"data,omitempty"`
+	}
+	// GetExchangeListReq get exchange list request
+	GetExchangeListReq  {}
+	// GetExchangeListRespData get exchange list response data
+	GetExchangeListRespData {
+		ExchangeList []Exchange `json:"exchangeList"` // Exchange list
+	}
+	// GetExchangeListResp get exchange list response
+	GetExchangeListResp {
+		BaseResp
+		Data GetExchangeListRespData `json:"data,omitempty"`
+	}
+	// GetKLineReq get K-line information request
+	GetKLineReq {
+		ExchangeId                    string `form:"exchangeId"` // Exchange ID
+		KlineType                     string `form:"klineType"` // K-line type
+		PriceType                     string `form:"priceType"` // Price type
+		Size                          uint32 `form:"size,optional"` // Number of records, default 100
+		OffsetData                    string `form:"offsetData,optional"` // Pagination offset, if empty, get first page
+		FilterBeginKlineTimeInclusive int64  `form:"filterBeginKlineTimeInclusive,optional"` // Start time, if empty, get oldest data
+		FilterEndKlineTimeExclusive   int64  `form:"filterEndKlineTimeExclusive,optional"` // End time, if empty, get latest data
+	}
+	// GetKLineRespData get K-line information response data
+	GetKLineRespData {
+		KlineList          []KLine `json:"klineList"` // K-line list
+		NextPageOffsetData string  `json:"nextPageOffsetData"` // Next page offset, if no next page, empty string
+	}
+	// GetKLineResp get K-line information response
+	GetKLineResp {
+		BaseResp
+		Data GetKLineRespData `json:"data,omitempty"`
+	}
+	// GetFundingHistoryReq get funding rate history request
+	GetFundingHistoryReq {
+		ExchangeId                  string `form:"exchangeId"` // Exchange ID
+		Size                        uint32 `form:"size"` // Number of records, must be greater than 0 and less than or equal to 100
+		OffsetData                  string `form:"offsetData,optional"` // Pagination offset, if empty, get first page
+		FilterSettlementFundingRate bool   `form:"filterSettlementFundingRate,optional"` // true to only query settlement funding rates (settled every 8 hours, predicted rate calculated every minute)
+		FilterBeginTimeInclusive    uint64 `form:"filterBeginTimeInclusive,optional"` // Start time, if empty, get oldest data
+		FilterEndTimeExclusive      uint64 `form:"filterEndTimeExclusive,optional"` // End time, if empty, get latest data
+	}
+	// GetFundingHistoryRespData get funding rate history response data
+	GetFundingHistoryRespData {
+		FundingRateList    []FundingRate `json:"fundingRateList"` // Funding rate list
+		NextPageOffsetData string        `json:"nextPageOffsetData"` // Next page offset, if no next page, empty string
+	}
+	// GetFundingHistoryResp get funding rate history response
+	GetFundingHistoryResp {
+		BaseResp
+		Data GetFundingHistoryRespData `json:"data,omitempty"`
+	}
+)
+
+// =============================== Perpetual Contract Related ===============================
+type (
+	// GetPerpetualAccountAssetReq get perpetual contract account assets request
+	GetPerpetualAccountAssetReq {
+		SubaccountId string `form:"subaccountId"` // Subaccount ID
+	}
+	// GetPerpetualAccountAssetRespData get perpetual contract account assets response data
+	GetPerpetualAccountAssetRespData {
+		SubaccountId                string                `json:"subaccountId"` // Subaccount ID
+		CollateralList              []PerpetualCollateral `json:"collateralList"` // Collateral list
+		PositionList                []PerpetualPosition   `json:"positionList"` // Position list
+		LastHandledBlockHeight      uint64                `json:"lastHandledBlockHeight"` // Last handled block height
+		LastHandledBlockTime        uint64                `json:"lastHandledBlockTime"` // Last handled block time
+		LastHandledTransactionIndex string                `json:"lastHandledTransactionIndex"` // Last handled transaction index
+		LastHandledEventIndex       string                `json:"lastHandledEventIndex"` // Last handled event index
+	}
+	// GetPerpetualAccountAssetResp get perpetual contract account assets response
+	GetPerpetualAccountAssetResp {
+		BaseResp
+		Data GetPerpetualAccountAssetRespData `json:"data,omitempty"`
+	}
+	OpenTpSlParam {
+		Price            string `json:"price"` // Order price, market order fill 0
+		Size             string `json:"size"` // Order size
+		ClientOrderId    string `json:"clientOrderId"` // Client custom ID, for idempotency check, max length 64
+		TriggerPriceType uint32 `json:"triggerPriceType"` // Trigger price type
+		TriggerPrice     string `json:"triggerPrice"` // Trigger price
+		ExpireTime       uint64 `json:"expireTime"` // Expiration time
+	}
+	// CollateralTransaction collateral transaction
+	CollateralTransaction {
+		Id                       string `json:"id"` // Unique identifier
+		SubaccountId             string `json:"subaccountId"` // Subaccount ID
+		CoinId                   string `json:"coinId"` // Coin ID
+		Type                     uint32 `json:"type"` // Transaction type
+		DeltaAmount              string `json:"deltaAmount"` // Collateral change amount
+		DeltaLegacyAmount        string `json:"deltaLegacyAmount"` // Legacy accounting balance field change amount
+		BeforeAmount             string `json:"beforeAmount"` // Collateral amount before change
+		BeforeLegacyAmount       string `json:"beforeLegacyAmount"` // Legacy accounting balance field before change
+		TransferPeerSubaccountId string `json:"transferPeerSubaccountId"` // Transfer peer subaccount ID
+		TransferPeerExchangeType uint32 `json:"transferPeerExchangeType"` // Transfer peer account exchange type
+		TransferReason           uint32 `json:"transferReason"` // Transfer reason
+		TransferRemark           string `json:"transferRemark"` // Transfer remark
+		FillSize                 string `json:"fillSize"` // Fill size (positive for buy, negative for sell)
+		FillValue                string `json:"fillValue"` // Fill value (positive for buy, negative for sell)
+		FillFee                  string `json:"fillFee"` // Fill fee (usually zero or negative)
+		FillPrice                string `json:"fillPrice"` // Fill price (not precise, for display only)
+		LiqFee                   string `json:"liqFee"` // Liquidation fee (exists when there is close fill, usually zero or negative)
+		RealizePnl               string `json:"realizePnl"` // Realized PnL (exists when there is close fill, not precise, for display only)
+		IsPositionTp             bool   `json:"isPositionTp"` // Whether it is a position take-profit/stop-loss order
+		IsPositionSl             bool   `json:"isPositionSl"` // Whether it is a position take-profit/stop-loss order
+		IsLiquidate              bool   `json:"isLiquidate"` // Whether it is a liquidation order
+		IsDeleverage             bool   `json:"isDeleverage"` // Whether it is an auto-deleverage order
+		FundingTime              uint64 `json:"fundingTime"` // Funding rate settlement time
+		FundingRate              string `json:"fundingRate"` // Funding rate
+		FundingIndexPrice        string `json:"fundingIndexPrice"` // Funding rate related index price
+		FundingOraclePrice       string `json:"fundingOraclePrice"` // Funding rate related oracle price
+		FundingPositionSize      string `json:"fundingPositionSize"` // Position size at funding fee settlement (positive for long, negative for short)
+		ExchangeId               string `json:"exchangeId"` // Associated position contract ID
+		OrderId                  string `json:"orderId"` // Associated order ID
+		OrderFillTransactionId   string `json:"orderFillTransactionId"` // Associated order fill transaction ID
+		OrderSubaccountId        string `json:"orderSubaccountId"` // Associated order subaccount ID
+		PositionTransactionId    string `json:"positionTransactionId"` // Associated position transaction ID
+		BlockHeight              uint64 `json:"blockHeight"` // Block height
+		BlockTime                uint64 `json:"blockTime"` // Block time
+		TransactionIndex         string `json:"transactionIndex"` // Transaction index
+		EventIndex               string `json:"eventIndex"` // Event index
+		CreatedTime              uint64 `json:"createdTime"` // Created time
+		UpdatedTime              uint64 `json:"updatedTime"` // Updated time
+	}
+	// GetCollateralTransactionReq get collateral transactions request
+	GetCollateralTransactionReq {
+		SubaccountId                    string `form:"subaccountId"` // Subaccount ID
+		Size                            uint32 `form:"size"` // Number of records
+		PageOffsetDataCreatedTime       string `form:"pageOffsetDataCreatedTime,optional"` // Pagination offset data, creation time
+		PageOffsetDataItemId            string `form:"pageOffsetDataItemId,optional"` // Pagination offset data, itemId
+		FilterTypeList                  string `form:"filterTypeList,optional"` // Transaction types, multiple transaction types separated by commas
+		FilterStartCreatedTimeInclusive uint64 `form:"filterStartCreatedTimeInclusive,optional"` // Filter collateral transactions created at or after specified start time, if empty or 0 start from earliest
+		FilterEndCreatedTimeExclusive   uint64 `form:"filterEndCreatedTimeExclusive,optional"` // Filter collateral transactions created before specified end time, if empty or 0 get until latest
+	}
+	// GetCollateralTransactionRespData get collateral transactions response data
+	GetCollateralTransactionRespData {
+		CollateralTransactionList []CollateralTransaction `json:"collateralTransactionList"` // Collateral transaction list
+		PageOffsetData            IndexerPageOffsetData   `json:"pageOffsetData"` // Next page offset data
+	}
+	// GetCollateralTransactionResp get collateral transactions response
+	GetCollateralTransactionResp {
+		BaseResp
+		Data GetCollateralTransactionRespData `json:"data,omitempty"`
+	}
+	// ==============================================================
+	// PerpetualPositionTransaction position transaction
+	PerpetualPositionTransaction {
+		Id                             string `json:"id"` // Unique identifier
+		SubaccountId                   string `json:"subaccountId"` // Subaccount ID
+		CoinId                         string `json:"coinId"` // Coin ID
+		ExchangeId                     string `json:"exchangeId"` // Contract ID
+		TermCount                      uint32 `json:"termCount"` // Position term count
+		MarginMode                     uint32 `json:"marginMode"` // Margin mode
+		Type                           uint32 `json:"type"` // Transaction type
+		DeltaOpenSize                  string `json:"deltaOpenSize"` // Position size change
+		DeltaOpenValue                 string `json:"deltaOpenValue"` // Open value change
+		DeltaOpenFee                   string `json:"deltaOpenFee"` // Open fee change
+		DeltaFundingFee                string `json:"deltaFundingFee"` // Funding fee change
+		DeltaIsolatedMarginAmount      string `json:"deltaIsolatedMarginAmount"` // Isolated margin amount change
+		DeltaIsolatedCollateralAmount  string `json:"deltaIsolatedCollateralAmount"` // Isolated collateral amount change
+		BeforeOpenSize                 string `json:"beforeOpenSize"` // Position size before change
+		BeforeOpenValue                string `json:"beforeOpenValue"` // Open value before change
+		BeforeOpenFee                  string `json:"beforeOpenFee"` // Open fee before change
+		BeforeFundingFee               string `json:"beforeFundingFee"` // Funding fee before change
+		BeforeIsolatedMarginAmount     string `json:"beforeIsolatedMarginAmount"` // Isolated margin amount before change
+		BeforeIsolatedCollateralAmount string `json:"beforeIsolatedCollateralAmount"` // Isolated collateral amount before change
+		FillSize                       string `json:"fillSize"` // Fill size (positive for buy, negative for sell)
+		FillValue                      string `json:"fillValue"` // Fill value (positive for buy, negative for sell)
+		FillFee                        string `json:"fillFee"` // Fill fee (usually zero or negative)
+		FillPrice                      string `json:"fillPrice"` // Fill price (not precise, for display only)
+		LiquidateFee                   string `json:"liquidateFee"` // Liquidation fee (exists when there is close fill, usually zero or negative)
+		RealizePnl                     string `json:"realizePnl"` // Realized PnL (exists when there is close fill, not precise, for display only)
+		IsPositionTp                   bool   `json:"isPositionTp"` // Whether it is a position take-profit/stop-loss order
+		IsPositionSl                   bool   `json:"isPositionSl"` // Whether it is a position take-profit/stop-loss order
+		IsLiquidate                    bool   `json:"isLiquidate"` // Whether it is a liquidation order
+		IsDeleverage                   bool   `json:"isDeleverage"` // Whether it is an auto-deleverage order
+		FundingTime                    uint64 `json:"fundingTime"` // Funding rate settlement time
+		FundingRate                    string `json:"fundingRate"` // Funding rate
+		FundingMarkPrice               string `json:"fundingMarkPrice"` // Funding rate related index price
+		FundingOraclePrice             string `json:"fundingOraclePrice"` // Funding rate related oracle price
+		FundingPositionSize            string `json:"fundingPositionSize"` // Position size at funding fee settlement (positive for long, negative for short)
+		OrderId                        string `json:"orderId"` // Associated order ID
+		OrderFillTransactionId         string `json:"orderFillTransactionId"` // Associated order fill transaction ID
+		CollateralTransactionId        string `json:"collateralTransactionId"` // Associated collateral transaction ID
+		BlockHeight                    uint64 `json:"blockHeight"` // Block height
+		BlockTime                      uint64 `json:"blockTime"` // Block time
+		TransactionIndex               string `json:"transactionIndex"` // Transaction index
+		EventIndex                     string `json:"eventIndex"` // Event index
+		CreatedTime                    uint64 `json:"createdTime"` // Created time
+		UpdatedTime                    uint64 `json:"updatedTime"` // Updated time
+	}
+	// GetPositionTransactionReq get position transactions request
+	GetPositionTransactionReq {
+		SubaccountId                    string `form:"subaccountId"` // Subaccount ID
+		Size                            uint32 `form:"size"` // Number of records
+		PageOffsetDataCreatedTime       string `form:"pageOffsetDataCreatedTime,optional"` // Pagination offset data, creation time
+		PageOffsetDataItemId            string `form:"pageOffsetDataItemId,optional"` // Pagination offset data, itemId
+		FilterExchangeIdList            string `form:"filterExchangeIdList,optional"` // Exchange IDs, multiple exchange IDs separated by commas
+		FilterTypeList                  string `form:"filterTypeList,optional"` // Transaction types, multiple transaction types separated by commas
+		FilterMarginModeList            string `form:"filterMarginModeList,optional"` // Margin modes, multiple margin modes separated by commas
+		FilterStartCreatedTimeInclusive uint64 `form:"filterStartCreatedTimeInclusive,optional"` // Filter position transactions created at or after specified start time, if empty or 0 start from earliest
+		FilterEndCreatedTimeExclusive   uint64 `form:"filterEndCreatedTimeExclusive,optional"` // Filter position transactions created before specified end time, if empty or 0 get until latest
+	}
+	// GetPositionTransactionRespData get position transactions response data
+	GetPositionTransactionRespData {
+		PositionTransactionList []PerpetualPositionTransaction `json:"positionTransactionList"` // Position transaction list
+		PageOffsetData          IndexerPageOffsetData          `json:"pageOffsetData"` // Next page offset data
+	}
+	// GetPositionTransactionResp get position transactions response
+	GetPositionTransactionResp {
+		BaseResp
+		Data GetPositionTransactionRespData `json:"data,omitempty"`
+	}
+	// Order order
+	Order {
+		Id                           string        `json:"id"` // Order ID
+		SubaccountId                 string        `json:"subaccountId"` // Subaccount ID
+		CoinId                       string        `json:"coinId"` // Trading coin ID
+		ExchangeId                   string        `json:"exchangeId"` // Exchange ID
+		IsBuy                        bool          `json:"isBuy"` // Whether it is a buy order
+		Price                        string        `json:"price"` // Order price, if price=0 then it's a market order
+		Size                         string        `json:"size"` // Order size
+		ClientOrderId                string        `json:"clientOrderId"` // Client custom ID, for idempotency check, max length 64
+		TimeInForce                  uint32        `json:"timeInForce"` // Order execution strategy
+		ReduceOnly                   bool          `json:"reduceOnly"` // Whether it is a reduce-only order
+		ExpireTime                   uint64        `json:"expireTime"` // Expiration time, unit: milliseconds
+		IsPositionTp                 bool          `json:"isPositionTp"` // Whether it is a position take-profit/stop-loss order
+		IsPositionSl                 bool          `json:"isPositionSl"` // Whether it is a position take-profit/stop-loss order
+		IsLiquidate                  bool          `json:"isLiquidate"` // Whether it is a liquidation order
+		IsDeleverage                 bool          `json:"isDeleverage"` // Whether it is an auto-deleverage order
+		TriggerType                  uint32        `json:"triggerType"` // Conditional order trigger type
+		TriggerPriceType             uint32        `json:"triggerPriceType"` // Conditional order trigger price type
+		TriggerPrice                 string        `json:"triggerPrice"` // Trigger price
+		OpenTpSlParentOrderId        string        `json:"openTpSlParentOrderId"` // Open order ID for open take-profit/stop-loss orders
+		IsSetOpenTp                  bool          `json:"isSetOpenTp"` // Whether to set open take-profit
+		OpenTpParam                  OpenTpSlParam `json:"openTpParam"` // Open take-profit parameters, only meaningful when is_set_open_tp=true
+		IsSetOpenSl                  bool          `json:"isSetOpenSl"` // Whether to set open stop-loss
+		OpenSlParam                  OpenTpSlParam `json:"openSlParam"` // Open stop-loss parameters, only meaningful when is_set_open_sl=true
+		MarginMode                   uint32        `json:"marginMode"` // Margin mode when placing order
+		Leverage                     uint32        `json:"leverage"` // Leverage multiplier when placing order
+		TakerFeeRatePpm              uint32        `json:"takerFeeRatePpm"` // Taker fee rate when placing order, unit: parts per million
+		MakerFeeRatePpm              uint32        `json:"makerFeeRatePpm"` // Maker fee rate when placing order, unit: parts per million
+		LiquidateFeeRatePpm          uint32        `json:"liquidateFeeRatePpm"` // Liquidation fee rate when placing order, unit: parts per million
+		AddOrderBookBlockHeight      uint64        `json:"addOrderBookBlockHeight"` // Block height when order was added to order book, if 0, not triggered yet
+		AddOrderBookBlockTime        uint64        `json:"addOrderBookBlockTime"` // Block time when order was added to order book, if 0, not triggered yet
+		AddOrderBookTransactionIndex string        `json:"addOrderBookTransactionIndex"` // Transaction index in block when order was added to order book
+		AddOrderBookOperationIndex   string        `json:"addOrderBookOperationIndex"` // Operation index in transaction when order was added to order book
+		Status                       uint32        `json:"status"` // Order status
+		CancelReason                 uint32        `json:"cancelReason"` // Order cancellation reason
+		CumFillSize                  string        `json:"cumFillSize"` // Cumulative filled size, actual type is decimal
+		CumFillValue                 string        `json:"cumFillValue"` // Cumulative filled value, actual type is decimal
+		CumFillFee                   string        `json:"cumFillFee"` // Cumulative filled fee, actual type is decimal
+		CumLiquidateFee              string        `json:"cumLiquidateFee"` // Cumulative liquidation fee, actual type is decimal
+		MaxFillPrice                 string        `json:"maxFillPrice"` // Maximum fill price for current order, actual type is decimal
+		MinFillPrice                 string        `json:"minFillPrice"` // Minimum fill price for current order, actual type is decimal
+		CumRealizePnl                string        `json:"cumRealizePnl"` // Cumulative realized PnL, actual type is decimal
+		CreatedTime                  uint64        `json:"createdTime"` // Created time
+		UpdatedTime                  uint64        `json:"updatedTime"` // Updated time
+	}
+	// AssetSnapshot asset snapshot
+	AssetSnapshot {
+		SubaccountId       string `json:"subaccountId"` // Subaccount ID
+		CoinId             string `json:"coinId"` // Coin ID
+		SnapshotTime       uint64 `json:"snapshotTime"` // Snapshot time
+		TotalEquity        string `json:"totalEquity"` // Total collateral value
+		TotalRealizePnl    string `json:"totalRealizePnl"` // Total realized PnL
+		TermRealizePnl     string `json:"termRealizePnl"` // Term realized PnL
+		TermFillValue      string `json:"termFillValue"` // Term fill value (currently only returned when time_tag is 1)
+		TermDepositAmount  string `json:"termDepositAmount"` // Term deposit amount
+		TermWithdrawAmount string `json:"termWithdrawAmount"` // Term withdrawal amount
+	}
+	// GetActiveOrderReq get active orders request
+	GetActiveOrderReq {
+		SubaccountId                    string `form:"subaccountId"` // Subaccount ID
+		Size                            uint32 `form:"size"` // Number of records, must be greater than 0 and less than or equal to 100
+		OffsetData                      string `form:"offsetData,optional"` // Offset data
+		PageOffsetDataCreatedTime       string `form:"pageOffsetDataCreatedTime,optional"` // Pagination offset data, creation time
+		PageOffsetDataItemId            string `form:"pageOffsetDataItemId,optional"` // Pagination offset data, itemId
+		FilterExchangeIdList            string `form:"filterExchangeIdList,optional"` // Filter active orders for specific contract, if empty, get all active orders for all contracts
+		FilterOrderStatusList           string `form:"filterOrderStatusList,optional"` // Filter orders by specified status, if empty, get all orders regardless of status
+		FilterIsLiquidateList           string `form:"filterIsLiquidateList,optional"` // Filter orders by whether they are liquidation orders, if empty, get all orders
+		FilterIsDeleverageList          string `form:"filterIsDeleverageList,optional"` // Filter orders by whether they are deleverage orders, if empty, get all orders
+		FilterIsPositionTpslList        string `form:"filterIsPositionTpslList,optional"` // Filter orders by whether they are position take-profit/stop-loss orders, if empty, get all orders
+		FilterOrderIdList               string `form:"filterOrderIdList,optional"` // Filter orders by specified order ID, if empty, get all orders
+		FilterStartCreatedTimeInclusive uint64 `form:"filterStartCreatedTimeInclusive,optional"` // Filter orders created at or after specified start time, if empty or 0, start from earliest
+		FilterEndCreatedTimeExclusive   uint64 `form:"filterEndCreatedTimeExclusive,optional"` // Filter orders created before specified end time, if empty or 0, go to latest
+	}
+	// GetActiveOrderRespData get active orders response data
+	GetActiveOrderRespData {
+		OrderList      []Order               `json:"orderList"` // Order list
+		NextPageOffset IndexerPageOffsetData `json:"nextPageOffset"` // Next page offset data
+	}
+	// GetActiveOrderResp get active orders response
+	GetActiveOrderResp {
+		BaseResp
+		Data GetActiveOrderRespData `json:"data,omitempty"`
+	}
+	// GetHistoryOrderFillTransactionReq get history order fill transactions request
+	GetHistoryOrderFillTransactionReq {
+		SubaccountId                    string `form:"subaccountId"` // Subaccount ID
+		Size                            uint32 `form:"size"` // Number of records
+		PageOffsetDataCreatedTime       string `form:"pageOffsetDataCreatedTime,optional"` // Pagination offset data, creation time
+		PageOffsetDataItemId            string `form:"pageOffsetDataItemId,optional"` // Pagination offset data, itemId
+		FilterExchangeIdList            string `form:"filterExchangeIdList,optional"` // Filter order fill transactions for specific contracts, if empty, get all contracts' order fill transactions
+		FilterIsBuyList                 string `form:"filterIsBuyList,optional"` // Filter order fill transactions by whether they are buy orders, if empty, get all order fill transactions
+		FilterIsLiquidateList           string `form:"filterIsLiquidateList,optional"` // Filter order fill transactions by whether they are liquidation orders, if empty, get all order fill transactions
+		FilterIsDeleverageList          string `form:"filterIsDeleverageList,optional"` // Filter order fill transactions by whether they are deleverage orders, if empty, get all order fill transactions
+		FilterIsPositionTpList          string `form:"filterIsPositionTpList,optional"` // Filter order fill transactions by whether they are position take-profit orders, if empty, get all order fill transactions
+		FilterIsPositionSlList          string `form:"filterIsPositionSlList,optional"` // Filter order fill transactions by whether they are position stop-loss orders, if empty, get all order fill transactions
+		FilterOrderIdList               string `form:"filterOrderIdList,optional"` // Filter order fill transactions by specified order IDs, if empty, get all order fill transactions
+		FilterStartCreatedTimeInclusive uint64 `form:"filterStartCreatedTimeInclusive,optional"` // Filter order fill transactions created at or after specified start time, if empty or 0, start from earliest
+		FilterEndCreatedTimeExclusive   uint64 `form:"filterEndCreatedTimeExclusive,optional"` // Filter order fill transactions created before specified end time, if empty or 0, go to latest
+	}
+	// GetHistoryOrderFillTransactionRespData get history order fill transactions response data
+	GetHistoryOrderFillTransactionRespData {
+		OrderFillTransactionList []OrderFillTransaction `json:"orderFillTransactionList"` // Order fill transaction list
+		NextPageOffset           IndexerPageOffsetData  `json:"nextPageOffset"` // Next page offset data
+	}
+	// GetHistoryOrderFillTransactionResp get history order fill transactions response
+	GetHistoryOrderFillTransactionResp {
+		BaseResp
+		Data GetHistoryOrderFillTransactionRespData `json:"data,omitempty"`
+	}
+	// GetHistoryOrderReq get history orders request
+	GetHistoryOrderReq {
+		SubaccountId                    string `form:"subaccountId"` // Subaccount ID
+		Size                            uint32 `form:"size"` // Number of records
+		PageOffsetDataCreatedTime       string `form:"pageOffsetDataCreatedTime,optional"` // Pagination offset data, creation time
+		PageOffsetDataItemId            string `form:"pageOffsetDataItemId,optional"` // Pagination offset data, itemId
+		FilterExchangeIdList            string `form:"filterExchangeIdList,optional"` // Filter history orders for specific contracts, if empty, get all contracts' history orders
+		FilterIsBuyList                 string `form:"filterIsBuyList,optional"` // Filter orders by whether they are buy orders, if empty, get all orders
+		FilterOrderStatusList           string `form:"filterOrderStatusList,optional"` // Filter orders by specified status, if empty, get all orders regardless of status
+		FilterIsLiquidateList           string `form:"filterIsLiquidateList,optional"` // Filter orders by whether they are liquidation orders, if empty, get all orders
+		FilterIsDeleverageList          string `form:"filterIsDeleverageList,optional"` // Filter orders by whether they are deleverage orders, if empty, get all orders
+		FilterIsPositionTpList          string `form:"filterIsPositionTpList,optional"` // Filter orders by whether they are position take-profit/stop-loss orders, if empty, get all orders
+		FilterIsPositionSlList          string `form:"filterIsPositionSlList,optional"` // Filter orders by whether they are position take-profit/stop-loss orders, if empty, get all orders
+		FilterOrderIdList               string `form:"filterOrderIdList,optional"` // Filter orders by specified order IDs, if empty, get all orders
+		FilterStartCreatedTimeInclusive uint64 `form:"filterStartCreatedTimeInclusive,optional"` // Filter orders created at or after specified start time, if empty or 0, start from earliest
+		FilterEndCreatedTimeExclusive   uint64 `form:"filterEndCreatedTimeExclusive,optional"` // Filter orders created before specified end time, if empty or 0, go to latest
+	}
+	// GetHistoryOrderRespData get history orders response data
+	GetHistoryOrderRespData {
+		OrderList      []Order               `json:"orderList"` // Order list
+		NextPageOffset IndexerPageOffsetData `json:"nextPageOffset"` // Next page offset data
+	}
+	// GetHistoryOrderResp get history orders response
+	GetHistoryOrderResp {
+		BaseResp
+		Data GetHistoryOrderRespData `json:"data,omitempty"`
+	}
+	// GetHistoryPositionTermReq get history position terms request
+	GetHistoryPositionTermReq {
+		SubaccountId                    string `form:"subaccountId"` // Subaccount ID
+		Size                            uint32 `form:"size"` // Number of records
+		FilterExchangeIdList            string `form:"filterExchangeIdList,optional"` // Filter position terms for specific contracts, if empty, get all contracts' position terms
+		FilterStartCreatedTimeInclusive uint64 `form:"filterStartCreatedTimeInclusive,optional"` // Filter position terms created at or after specified start time, if empty or 0, start from earliest
+		FilterEndCreatedTimeExclusive   uint64 `form:"filterEndCreatedTimeExclusive,optional"` // Filter position terms created before specified end time, if empty or 0, go to latest
+		PageOffsetDataCreatedTime       string `form:"pageOffsetDataCreatedTime,optional"` // Pagination offset data, creation time
+		PageOffsetDataItemId            string `form:"pageOffsetDataItemId,optional"` // Pagination offset data, itemId
+	}
+	// GetHistoryPositionTermRespData get history position terms response data
+	GetHistoryPositionTermRespData {
+		PositionTermList []PerpetualPositionTerm `json:"positionTermList"` // Position term list
+		NextPageOffset   IndexerPageOffsetData   `json:"nextPageOffset"` // Next page offset data
+	}
+	// GetHistoryPositionTermResp get history position terms response
+	GetHistoryPositionTermResp {
+		BaseResp
+		Data GetHistoryPositionTermRespData `json:"data,omitempty"`
+	}
+	// GetAssetSnapshotReq get asset snapshots request
+	GetAssetSnapshotReq {
+		SubaccountId                    string `form:"subaccountId"` // Subaccount ID
+		Size                            uint32 `form:"size"` // Number of records
+		PageOffsetDataCreatedTime       string `form:"pageOffsetDataCreatedTime,optional"` // Pagination offset data, creation time
+		PageOffsetDataItemId            string `form:"pageOffsetDataItemId,optional"` // Pagination offset data, itemId
+		FilterCoinId                    string `form:"filterCoinId,optional"` // Filter asset snapshots for specific coins, if empty, get all coins' asset snapshots
+		FilterTimeTag                   string `form:"filterTimeTag,optional"` // Filter asset snapshots by time type, 0 for hourly, 1 for daily
+		FilterStartCreatedTimeInclusive uint64 `form:"filterStartCreatedTimeInclusive,optional"` // Filter asset snapshots created at or after specified start time, if empty or 0, start from earliest
+		FilterEndCreatedTimeExclusive   uint64 `form:"filterEndCreatedTimeExclusive,optional"` // Filter asset snapshots created before specified end time, if empty or 0, go to latest
+	}
+	// GetAssetSnapshotRespData get asset snapshots response data
+	GetAssetSnapshotRespData {
+		AssetSnapshotList []AssetSnapshot       `json:"assetSnapshotList"` // Asset snapshot list
+		NextPageOffset    IndexerPageOffsetData `json:"nextPageOffset"` // Next page offset data
+	}
+	// GetAssetSnapshotResp get asset snapshots response
+	GetAssetSnapshotResp {
+		BaseResp
+		Data GetAssetSnapshotRespData `json:"data,omitempty"`
+	}
+)
+
+// =============================== Market Data Related ===============================
+type (
+	TickerData {
+		ExchangeId         string `json:"exchangeId"` // Contract ID
+		PriceChange        string `json:"priceChange"` // Price change
+		PriceChangePercent string `json:"priceChangePercent"` // Price change percentage
+		Trades             string `json:"trades"` // Number of trades
+		Size               string `json:"size"` // Volume
+		Value              string `json:"value"` // Turnover
+		High               string `json:"high"` // Highest price
+		Low                string `json:"low"` // Lowest price
+		Open               string `json:"open"` // Open price
+		Close              string `json:"close"` // Close price
+		HighTime           string `json:"highTime"` // Highest price time
+		LowTime            string `json:"lowTime"` // Lowest price time
+		StartTime          string `json:"startTime"` // Start time
+		EndTime            string `json:"endTime"` // End time
+		LastPrice          string `json:"lastPrice"` // Last price
+		MarkPrice          string `json:"markPrice"` // Mark price
+		IndexPrice         string `json:"indexPrice"` // Index price
+		OraclePrice        string `json:"oraclePrice"` // Oracle price
+		OpenInterest       string `json:"openInterest"` // Open interest
+		FundingRate        string `json:"fundingRate"` // Funding rate
+		FundingTime        string `json:"fundingTime"` // Funding rate time
+		NextFundingTime    string `json:"nextFundingTime"` // Next funding rate time
+	}
+	DepthData {
+		IsSnapshot   bool        `json:"isSnapshot"` // Whether it is a snapshot
+		StartVersion string      `json:"startVersion"` // Start version
+		EndVersion   string      `json:"endVersion"` // End version
+		Level        uint32      `json:"level"` // Depth level
+		ExchangeId   string      `json:"exchangeId"` // Contract ID
+		Asks         []BookOrder `json:"asks"` // Ask orders
+		Bids         []BookOrder `json:"bids"` // Bid orders
+	}
+	BookOrder {
+		Price string `json:"price"` // Price
+		Size  string `json:"size"` // Size
+	}
+	Ticket {
+		TicketId       string `json:"ticketId"` // Trade ID
+		ExchangeId     string `json:"exchangeId"` // Contract ID
+		Time           string `json:"time"` // Trade time
+		Price          string `json:"price"` // Trade price
+		Size           string `json:"size"` // Trade size
+		TakerOrderId   string `json:"takerOrderId"` // Taker order ID
+		MakerOrderId   string `json:"makerOrderId"` // Maker order ID
+		TakerAccountId string `json:"takerAccountId"` // Taker account ID
+		MakerAccountId string `json:"makerAccountId"` // Maker account ID
+		IsBestMatch    bool   `json:"isBestMatch"` // Whether it is the best match
+		IsBuyerMaker   bool   `json:"isBuyerMaker"` // Whether buyer is maker
+		TxHash         string `json:"txHash"` // Transaction hash
+	}
+	Transfer {
+		SenderSubaccountId   string `json:"senderSubaccountId"` // Sender subaccount ID
+		SenderExchangeType   uint32 `json:"senderExchangeType"` // Asset exchange type 0: Unknown 1: Spot 2: Contract
+		ReceiverSubaccountId string `json:"receiverSubaccountId"` // Receiver subaccount ID
+		ReceiverExchangeType uint32 `json:"receiverExchangeType"` // Receiver asset exchange type 0: Unknown 1: Spot 2: Contract
+		CoinId               string `json:"coinId"` // Asset coin ID
+		Amount               string `json:"amount"` // Asset amount
+		TransferReason       uint32 `json:"transferReason"` // Transfer reason 0: Unknown 1: User manual transfer 2: User deposit transfer 3: User withdrawal transfer
+		Remark               string `json:"remark"` // Remark
+	}
+	OrderFillTransaction {
+		Id                                    string `json:"id"` // Unique identifier
+		SubaccountId                          string `json:"subaccountId"` // Subaccount ID
+		CoinId                                string `json:"coinId"` // Trading coin ID
+		ExchangeId                            string `json:"exchangeId"` // Exchange ID
+		OrderId                               string `json:"orderId"` // Order ID
+		IsBuy                                 bool   `json:"isBuy"` // Buy/sell direction
+		FillSize                              string `json:"fillSize"` // Actual fill size
+		FillValue                             string `json:"fillValue"` // Actual fill value
+		FillFee                               string `json:"fillFee"` // Actual fill fee
+		FillPrice                             string `json:"fillPrice"` // Fill price (not precise, for display only)
+		LiquidateFee                          string `json:"liquidateFee"` // If it's a liquidation (forced close) fill, this field is the liquidation fee
+		RealizePnl                            string `json:"realizePnl"` // Actual realized PnL (only has value when fill includes close)
+		IsMaker                               bool   `json:"isMaker"` // Actual fill direction, whether it is a maker fill
+		IsPositionTp                          bool   `json:"isPositionTp"` // Whether it is a position take-profit/stop-loss order
+		IsPositionSl                          bool   `json:"isPositionSl"` // Whether it is a position take-profit/stop-loss order
+		IsLiquidate                           bool   `json:"isLiquidate"` // Whether it is a liquidation (forced close) order
+		IsDeleverage                          bool   `json:"isDeleverage"` // Whether it is an auto-deleverage order
+		SpotAssetTransactionId                string `json:"spotAssetTransactionId"` // Associated spot asset transaction ID
+		ClosePerpetualPositionTransactionId   string `json:"closePerpetualPositionTransactionId"` // Associated close position transaction ID
+		ClosePerpetualCollateralTransactionId string `json:"closePerpetualCollateralTransactionId"` // Associated close collateral transaction ID
+		OpenPerpetualPositionTransactionId    string `json:"openPerpetualPositionTransactionId"` // Associated open position transaction ID
+		OpenPerpetualCollateralTransactionId  string `json:"openPerpetualCollateralTransactionId"` // Associated open collateral transaction ID
+		BlockHeight                           uint64 `json:"blockHeight"` // Block height
+		BlockTime                             uint64 `json:"blockTime"` // Block time
+		TransactionIndex                      string `json:"transactionIndex"` // Transaction index
+		EventIndex                            string `json:"eventIndex"` // Event index
+		CreatedTime                           uint64 `json:"createdTime"` // Created time
+		UpdatedTime                           uint64 `json:"updatedTime"` // Updated time
+	}
+	FundingRate {
+		ExchangeId                   string `json:"exchangeId"` // Contract ID
+		FundingTime                  uint64 `json:"fundingTime"` // Funding rate time
+		FundingCalculateTime         string `json:"fundingCalculateTime"` // Rate calculation time in milliseconds
+		FundingRate                  string `json:"fundingRate"` // Funding rate
+		OraclePrice                  string `json:"oraclePrice"` // Oracle price
+		IndexPrice                   string `json:"indexPrice"` // Index price
+		IsSettlement                 bool   `json:"isSettlement"` // Whether it is a settlement
+		ForecastFundingRate          string `json:"forecastFundingRate"` // Forecast funding rate
+		PreviousFundingRate          string `json:"previousFundingRate"` // Previous funding rate
+		PreviousFundingCalculateTime string `json:"previousFundingCalculateTime"` // Previous funding rate calculation time in milliseconds
+		PremiumIndex                 string `json:"premiumIndex"` // Premium index
+		AvgPremiumIndex              string `json:"avgPremiumIndex"` // Average premium index
+		PremiumIndexCalculateTime    string `json:"premiumIndexCalculateTime"` // Premium index calculation time
+		ImpactMarginNotional         string `json:"impactMarginNotional"` // Impact margin notional for depth-weighted price calculation
+		ImpactAskPrice               string `json:"impactAskPrice"` // Depth-weighted best ask price
+		ImpactBidPrice               string `json:"impactBidPrice"` // Depth-weighted best bid price
+		InterestRate                 string `json:"interestRate"` // (Config field) Fixed interest rate
+		PredictedFundingRate         string `json:"predictedFundingRate"` // Combined rate interestRate/frequency
+		FundingRateIntervalMinutes   uint32 `json:"fundingRateIntervalMinutes"` // Funding rate interval in minutes
+	}
+	Price {
+		ExchangeId  string `json:"exchangeId"` // Contract ID
+		PriceType   string `json:"priceType"` // Price type
+		Price       string `json:"price"` // Price
+		PriceTime   uint64 `json:"priceTime"` // Price time
+		CreatedTime uint64 `json:"createdTime"` // Created time
+	}
+	PerpetualPositionTerm {
+		SubaccountId    string `json:"subaccountId"` // Subaccount ID
+		CoinId          string `json:"coinId"` // Collateral coin ID
+		ExchangeId      string `json:"exchangeId"` // Perpetual contract ID
+		TermCount       uint32 `json:"termCount"` // Term count, starts from 1, increments after complete close and open
+		IsIsolated      bool   `json:"isIsolated"` // Whether it is isolated
+		CumOpenSize     string `json:"cumOpenSize"` // Cumulative open size
+		CumOpenValue    string `json:"cumOpenValue"` // Cumulative open value
+		CumOpenFee      string `json:"cumOpenFee"` // Cumulative open fee
+		CumCloseSize    string `json:"cumCloseSize"` // Cumulative close size
+		CumCloseValue   string `json:"cumCloseValue"` // Cumulative close value
+		CumCloseFee     string `json:"cumCloseFee"` // Cumulative close fee
+		CumFundingFee   string `json:"cumFundingFee"` // Cumulative settled funding fee
+		CumLiquidateFee string `json:"cumLiquidateFee"` // Cumulative liquidation fee
+		CloseLeverage   string `json:"closeLeverage"` // Leverage multiplier at complete close, actual type is decimal
+		CreatedTime     uint64 `json:"createdTime"` // Created time
+		UpdatedTime     uint64 `json:"updatedTime"` // Updated time
+	}
+)
+
+// =============================== WebSocket Related ===============================
+type (
+	WsReqBase {
+		Method string `json:"method"` // Request method
+	}
+	WsRespBase {
+		Channel string `json:"channel"` // Channel
+		Event   string `json:"event,omitempty"` // Event
+		User    string `json:"user,omitempty,optional"` // ETH address
+	}
+	WsSubscribeReq {
+		WsReqBase
+		Subscription WsRegisterReq `json:"subscription"` // Subscription
+	}
+	WsRegisterReq {
+		Channel      string `json:"channel"` // Channel
+		ChainType    int32  `json:"chainType,optional"` // Chain type
+		ChainAddress string `json:"chainAddress,optional"` // ETH address
+	}
+	WsSubscribeSuccessResp {
+		WsRespBase
+		Data interface{} `json:"data"` // Original subscription message
+	}
+	WsWebDataData {
+		IsSnapshot       bool   `json:"isSnapshot"` // Whether it is a snapshot
+		Version          string `json:"version"` // Version number
+		IndexerEventType int    `json:"indexerEventType"` // Event type 0: Unspecified 1: Agent binding create event 2: Agent binding delete event 3: Subaccount update event 4: Order update event 5: Position collateral change event 6: Transfer-in update event 7: Transfer-out update event
+		// TransferList     []Transfer            `json:"transferList"` // Transfer list
+		SubaccountList            []Subaccount            `json:"subaccountList"` // Subaccount list
+		OrderList                 []Order                 `json:"orderList"` // Order list
+		CollateralList            []PerpetualCollateral   `json:"collateralList"` // Collateral list
+		PositionList              []PerpetualPosition     `json:"positionList"` // Position list
+		CollateralTransactionList []CollateralTransaction `json:"collateralTransactionList"` // Collateral transaction list
+		// PositionTransactionList   []PerpetualPositionTransaction `json:"positionTransactionList"` // Position transaction list
+		OrderFillTransactionList []OrderFillTransaction `json:"orderFillTransactionList"` // Order fill transaction list
+		AgentList                []AgentBinding         `json:"agentList"` // Agent list
+		AgentBindingCreateList   []AgentBinding         `json:"agentBindingCreateList"` // Agent binding create list
+		AgentBindingRemoveList   []AgentBinding         `json:"agentBindingRemoveList"` // Agent binding remove list
+	}
+	WsWebDataResp {
+		WsRespBase
+		Data WsWebDataData `json:"data"` // Data
+	}
+	WsTickerResp {
+		WsRespBase
+		Data []TickerData `json:"data"` // Market data
+	}
+	WsKlineResp {
+		WsRespBase
+		Data []KLine `json:"data"` // Market data
+	}
+	WsQuoteDepthResp {
+		WsRespBase
+		Data DepthData `json:"data"` // Market data
+	}
+	WsQuoteTradeResp {
+		WsRespBase
+		Data []Ticket `json:"data"` // Market data
+	}
+	WsQuoteFundingRateResp {
+		WsRespBase
+		Data FundingRate `json:"data"` // Market data
+	}
+	WsQuotePriceResp {
+		WsRespBase
+		Data Price `json:"data"` // Market data
+	}
+	WsTxResultResp {
+		WsRespBase
+		Data ChainTransactionDetail `json:"data"` // Transaction data
+	}
+)
+
+// =============================== Explorer Related ===============================
+type (
+	ExplorerTxAction {
+		TypeUrl string      `json:"typeUrl"` // Type
+		Detail  interface{} `json:"detail"` // Details
+	}
+	WsExplorerNewBlockResp {
+		Type      string `json:"type"` // Information type
+		Height    uint64 `json:"height"` // Block height
+		BlockTime uint64 `json:"blockTime"` // Block time
+		Hash      string `json:"hash"` // Block hash
+		Proposer  string `json:"proposer"` // Proposer
+		NumTxs    string `json:"numTxs"` // Number of transactions
+	}
+	WsExplorerNewTxsResp {
+		Type       string             `json:"type"` // Information type
+		RawTx      string             `json:"rawTx"` // Raw data
+		User       string             `json:"user"` // User
+		Block      uint64             `json:"block"` // Block
+		Hash       string             `json:"hash"` // Block hash
+		Status     bool               `json:"status"` // Status
+		Error      interface{}        `json:"error"` // Error
+		ActionList []ExplorerTxAction `json:"action"` // Actions
+	}
+	ChainBlockDetail {
+		Height    uint64                   `json:"height"` // Block height
+		Time      uint64                   `json:"time"` // Block time
+		Validator string                   `json:"validator"` // Validator
+		Hash      string                   `json:"hash"` // Block hash
+		Txs       []ChainTransactionDetail `json:"txs"` // Number of transactions
+	}
+	ChainTransactionDetail {
+		RawTx      string             `json:"rawTx"` // Raw data
+		Block      uint64             `json:"block"` // Block height
+		Hash       string             `json:"hash"` // Transaction hash
+		From       string             `json:"from"` // Sender
+		Status     bool               `json:"status"` // Status
+		Error      interface{}        `json:"error"` // Error
+		ActionList []ExplorerTxAction `json:"action"` // Actions
+		ResultData string             `json:"resultData"` // Data
+	}
+	GetBlockDetailReq {
+		Height int64 `path:"height"` // Block height
+	}
+	GetBlockDetailResp {
+		BaseResp
+		Data ChainBlockDetail `json:"data,omitempty"`
+	}
+	GetTransactionDetailReq {
+		Hash string `path:"hash"` // Transaction hash
+	}
+	GetTransactionDetailResp {
+		BaseResp
+		Data ChainTransactionDetail `json:"data,omitempty"`
+	}
+)
+
+// =============================== Services ===============================
+// =============================== Base Services ===============================
+@server (
+	tags:       "Base Services"
+	group:      base
+	middleware: ResponseWrapperMiddleware
+)
+service gateway {
+	// Health check
+	@doc (
+		description: "Health check"
+	)
+	@handler health
+	get /health returns (BaseResp)
+}
+
+// =============================== User Related ===============================
+@server (
+	tags:       "subaccount"
+	group:      subaccount
+	prefix:     /api/v1
+	middleware: ResponseWrapperMiddleware
+)
+service gateway {
+	// Get accountNumber and sequence for the address
+	@doc (
+		description: "Get accountNumber and sequence for the address"
+	)
+	@handler getAddressInfo
+	get /address/getAddressInfo (GetAddressInfoReq) returns (GetAddressInfoResp)
+
+	// Get user information by ETH address
+	@doc (
+		description: "Get user information by ETH address"
+	)
+	@handler getSubaccountInfo
+	get /subaccount/getSubaccount (GetSubaccountReq) returns (GetSubaccountResp)
+}
+
+// =============================== Trading Related ===============================
+@server (
+	tags:       "Trading Related"
+	group:      trade
+	prefix:     /api/v1
+	middleware: ResponseWrapperMiddleware
+)
+service gateway {
+	// Get coin list
+	@doc (
+		description: "Get coin list"
+	)
+	@handler getCoinList
+	get /trade/getCoinList (GetCoinListReq) returns (GetCoinListResp)
+
+	// Get exchange list
+	@doc (
+		description: "Get exchange list"
+	)
+	@handler getExchangeList
+	get /trade/getExchangeList (GetExchangeListReq) returns (GetExchangeListResp)
+
+	// Get K-line information
+	@doc (
+		description: "Get K-line information<br>
+		priceType: Price type, optional values:<br>
+		PRICE_TYPE_LAST: Latest price<br>
+		PRICE_TYPE_ASK_BEST: Best ask price<br>
+		PRICE_TYPE_BID_BEST: Best bid price<br>
+		PRICE_TYPE_MARK: Mark price<br>
+		PRICE_TYPE_ORACLE: Oracle price<br>
+		klineType: Time type, optional values:<br>
+		MINUTE_1: 1 minute<br>
+		MINUTE_5: 5 minutes<br>
+		MINUTE_15: 15 minutes<br>
+		MINUTE_30: 30 minutes<br>
+		HOUR_1: 1 hour<br>
+		HOUR_2: 2 hours<br>
+		HOUR_4: 4 hours<br>
+		HOUR_6: 6 hours<br>
+		HOUR_8: 8 hours<br>
+		HOUR_12: 12 hours<br>
+		DAY_1: 1 day<br>
+		WEEK_1: 1 week<br>
+		MONTH_1: 1 month<br>"
+	)
+	@handler getKline
+	get /trade/getKline (GetKLineReq) returns (GetKLineResp)
+
+	// Get funding rate history
+	@doc (
+		description: "Get funding rate history"
+	)
+	@handler getFundingHistory
+	get /trade/getFundingHistory (GetFundingHistoryReq) returns (GetFundingHistoryResp)
+
+	// Send transaction
+	@doc (
+		description: "Send transaction"
+	)
+	@handler sendTransaction
+	post /trade/sendTransaction (SendTransactionReq) returns (SendTransactionResp)
+
+	// Send sync transaction
+	@doc (
+		description: "Send sync transaction"
+	)
+	@handler sendSyncTransaction
+	post /trade/sendSyncTransaction (SendSyncTransactionReq) returns (SendSyncTransactionResp)
+}
+
+@server (
+	tags:       "Perpetual Contract Related"
+	group:      perpetual
+	prefix:     /api/v1
+	middleware: ResponseWrapperMiddleware
+)
+service gateway {
+	// Get perpetual contract account assets
+	@doc (
+		description: "Get perpetual contract account assets"
+	)
+	@handler getPerpetualAccountAsset
+	get /trade/getPerpetualAccountAsset (GetPerpetualAccountAssetReq) returns (GetPerpetualAccountAssetResp)
+
+	// Get collateral transactions with pagination
+	@doc (
+		description: "Get collateral transactions with pagination"
+	)
+	@handler getCollateralTransaction
+	get /trade/getCollateralTransaction (GetCollateralTransactionReq) returns (GetCollateralTransactionResp)
+
+	// Get position transactions with pagination
+	@doc (
+		description: "Get position transactions with pagination"
+	)
+	@handler getPositionTransaction
+	get /trade/getPositionTransaction (GetPositionTransactionReq) returns (GetPositionTransactionResp)
+
+	// Get active orders for account with pagination
+	@doc (
+		description: "Get active orders for account with pagination"
+	)
+	@handler getActiveOrder
+	get /trade/getActiveOrder (GetActiveOrderReq) returns (GetActiveOrderResp)
+
+	// Get order fill history for account with pagination
+	@doc (
+		description: "Get order fill history for account with pagination"
+	)
+	@handler getHistoryOrderFillTransaction
+	get /trade/getHistoryOrderFillTransaction (GetHistoryOrderFillTransactionReq) returns (GetHistoryOrderFillTransactionResp)
+
+	// Get historical orders for account with pagination
+	@doc (
+		description: "Get historical orders for account with pagination"
+	)
+	@handler getHistoryOrder
+	get /trade/getHistoryOrder (GetHistoryOrderReq) returns (GetHistoryOrderResp)
+
+	// Get historical position snapshots
+	@doc (
+		description: "Get historical position snapshots"
+	)
+	@handler getHistoryPositionTerm
+	get /trade/getHistoryPositionTerm (GetHistoryPositionTermReq) returns (GetHistoryPositionTermResp)
+
+	// Get account history asset snapshots
+	@doc (
+		summary: "Get account history asset snapshots"
+	)
+	@handler getAssetSnapshot
+	get /trade/getAssetSnapshot (GetAssetSnapshotReq) returns (GetAssetSnapshotResp)
+}
+
+// =============================== WebSocket Related ===============================
+@server (
+	tags:       "WebSocket Related"
+	group:      ws
+	prefix:     /api/v1
+	middleware: EnableWSMiddleware
+)
+service gateway {
+	// Establish WebSocket connection
+	@doc (
+		description: "Establish WebSocket connection<br>
+		Meanings of the following enum values:<br>
+		transferReason: 0: Unknown 1: User manually initiated transfer 2: Transfer caused by user deposit 3: Transfer caused by user withdrawal<br>
+		marginMode: 0: Unknown 1: Cross margin mode 2: Isolated margin mode<br>
+		timeInForce: 0: Unknown 1: GOOD_TIL_CANCEL 2: FILL_OR_KILL 3: IMMEDIATE_OR_CANCEL 4: POST_ONLY<br>
+		triggerType: 0: Unknown 1: Stop-loss conditional order. If is_buy=false, then current price <= triggerPrice triggers; if is_buy=true, then current price >= triggerPrice triggers 2: Take-profit conditional order. If is_buy=false, then current price >= triggerPrice triggers; if is_buy=true, then current price <= triggerPrice triggers<br>
+		priceType: 0: Unknown 1: Last traded price 2: Best ask price 3: Best bid price 4: Oracle price 5: Index price<br>
+		orderCancelReason: 0: Unknown 1: Order fully filled, automatically cancelled. Essentially also a cancellation reason 2: User actively cancelled 3: Expired cancellation 4: Market order/FOK/IOC/PostOnly order, cancelled due to insufficient fill quantity 5: Cancelled due to not meeting reduceOnly condition 6: Insufficient margin cancellation 7: Cancelled due to liquidation trigger 8: Admin cancellation<br>
+		General format: {method: 'subscribe/unsubscribe', subscription: {channel: 'xxx'}}<br>
+		Subscription response: {channel: 'subscriptionResponse', data: {method: 'subscribe/unsubscribe', subscription: {channel: 'xxx'}}}<br>
+		Subscribe to tradeData: {method: 'subscribe', subscription: { channel: 'tradeData', chainType: 1, chainAddress: 'ethAddress' } }<br>
+		Unsubscribe from tradeData: {method: 'unsubscribe', subscription: { channel: 'tradeData', chainType: 1, chainAddress: 'ethAddress' } }<br>
+		tradeData return data: {'channel': 'tradeData', 'user': 'ethAddress', 'data':{'eventType': 0, 'isSnapshot': true, 'version': '0', 'subaccountList': [{}], 'agentBindingList': [{}] , 'orderList': [{}] , 'collateralList': [{}] , 'positionList': [{}] , 'orderFillTransactionList': [{}] , 'agentBindingCreateList': [{}] , 'agentBindingRemoveList': [{}] }<br>
+		eventType: 0: Unspecified 1: Agent binding creation event 2: Agent binding removal event 3: Subaccount update event 4: Order update event 5: Position collateral change event 6: Transfer-in update event 7: Transfer-out update event<br>
+		For details, refer to antx-proto/proto/antx/server/indexer/indexer_event.proto<br>
+		Subscribe to kline: {'method':'subscribe', 'subscription':{'channel':'kline.PRICE_TYPE_LAST.200001.MINUTE_1/kline.priceType.exchangeId.klineType'}}<br>
+		Unsubscribe from kline: {method: 'unsubscribe', subscription: { channel: 'kline.PRICE_TYPE_LAST.200001.MINUTE_1' } }<br>
+		kline return data: {'channel':'kline','event':'payload','data':[{'klineId':'13743968457917283','exchangeId':'200001','klineType':'MINUTE_1','priceType':'PRICE_TYPE_LAST','klineTime':1749863220000,'trades':'0','size':'0','value':'0','high':'100000.0','low':'100000.0','open':'100000.0','close':'100000.0','makerBuySize':'0','makerBuyValue':'0'}]}<br>
+		Subscribe to ticker: {method: 'subscribe', subscription: { channel: 'ticker.all/ticker.200001/ticker.exchangeId' } }<br>
+		Unsubscribe from ticker: {method: 'unsubscribe', subscription: { channel: 'ticker.all/ticker.200001' } }<br>
+		ticker return data: {'channel':'ticker','event':'payload','data':[{'exchangeId':'200001','priceChange':'0.00000000','priceChangePercent':'0.00000000','trades':'0','size':'0','value':'0','high':'100000.0','low':'100000.0','open':'100000.0','close':'100000.0','highTime':'1749863220000','lowTime':'1749863220000','startTime':'1749863220000','endTime':'1749863220000','lastPrice':'100000.0','markPrice':'100000.0','indexPrice':'100000.0','openInterest':'0'}]}<br>
+		Subscribe to depth: {method: 'subscribe', subscription: { channel: 'depth.200001.200/depth.exchangeId.Level' } }<br>
+		Unsubscribe from depth: {method: 'unsubscribe', subscription: { channel: 'depth.200001.200' } }<br>
+		depth return data: {'channel':'depth','event':'payload','data':[{'isSnapshot': true, 'startVersion':'1','endVersion':'1','level':'200','exchangeId':'200001','asks':[{'price':'100000.0','size':'100000.0'}],'bids':[{'price':'100000.0','size':'100000.0'}]}]}<br>
+		Subscribe to trade: {method: 'subscribe', subscription: { channel: 'trade.200001/trade.exchangeId' } }<br>
+		Unsubscribe from trade: {method: 'unsubscribe', subscription: { channel: 'trade.200001' } }<br>
+		trade return data: {'channel':'trade','event':'payload','data':[{'ticketId':'13743968457917283','exchangeId':'200001','time':'1749863220000','price':'100000.0','size':'100000.0','value':'100000000.0','takerOrderId':'13743968457917283','makerOrderId':'13743968457917283','takerAccountId':'1','makerAccountId':'1', 'isBestMatch':'true', 'isBuyerMaker':'true'}]}<br>
+		Transaction result push: {'channel':'txResult', 'user':'antxxxx', 'data':{'rawTx':'', 'block':123, 'hash':'0xxxx', 'from':'antxxxx', 'status':'false', 'action':[{'typeUrl':'', 'detail':{}}]}}<br>
+		Subscribe to funding rate: {method: 'subscribe', subscription: { channel: 'fundingRate.200001/fundingRate.exchangeId' } }<br>
+		Unsubscribe from funding rate: {method: 'unsubscribe', subscription: { channel: 'fundingRate.200001' } }<br>
+		funding rate push: {'channel':'fundingRate','event':'payload','data':[{'exchangeId':'200001','fundingTime':'1749863220000','fundingCalculateTime':'1749863220000','fundingRate':'0.00000000','oraclePrice':'100000.0','markPrice':'100000.0','isSettlement':'false','forecastFundingRate':'0.00000000','previousFundingRate':'0.00000000','previousFundingCalculateTime':'1749863220000','premiumIndex':'0.00000000','avgPremiumIndex':'0.00000000','premiumIndexCalculateTime':'1749863220000','impactMarginNotional':'0.00000000','impactAskPrice':'100000.0','impactBidPrice':'100000.0','interestRate':'0.00000000','predictedFundingRate':'0.00000000','fundingRateIntervalMinutes':'0'}]}<br>
+		Subscribe to price: {method: 'subscribe', subscription: { channel: 'price.200001/price.exchangeId' } }<br>
+		Unsubscribe from price: {method: 'unsubscribe', subscription: { channel: 'price.200001' } }<br>
+		price push: {'channel':'price','event':'payload','data':[{'exchangeId':'200001','priceType':'PRICE_TYPE_LAST','price':'100000.0','priceTime':'1749863220000','createdTime':'1749863220000'}]}<br>
+		"
+	)
+	@handler serveWs
+	get /ws
+}
+

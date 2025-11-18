@@ -1,0 +1,43 @@
+[build-system]
+requires = [
+  "setuptools>=68",
+  "wheel",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "antex-sdk"
+version = "0.1.0"
+description = "Antex SDK for Python: HTTP, WebSocket, and on-chain trading support"
+readme = "README.md"
+authors = [
+  { name = "Antex Protocol" }
+]
+license = { text = "Apache-2.0" }
+requires-python = ">=3.8"
+dependencies = [
+  "requests>=2.31.0",
+  "websocket-client>=1.6.0",
+  "protobuf>=4.25.0",
+  "eth-keys>=0.4.0",
+  "eth-utils>=2.2.0",
+  "eth-account>=0.10.0",
+  "bech32>=1.2.0",
+  "ecdsa>=0.18.0",
+  "pycryptodome>=3.19.0",
+  "cosmos-proto>=0.3.0",
+  "coincurve>=18.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/antexprotocol/antex-sdk"
+
+[tool.setuptools]
+packages = [
+  "antex_sdk",
+  "antex_proto",
+]
+package-dir = {"" = "."}
+include-package-data = true
+
+

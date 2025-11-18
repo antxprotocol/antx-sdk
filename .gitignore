@@ -1,0 +1,96 @@
+proto
+
+# Vendor directory - ignore everything except antxprotocol
+golang/vendor/*
+# Exclude github.com/antxprotocol from ignore
+!golang/vendor/github.com/
+!golang/vendor/github.com/antxprotocol/
+!golang/vendor/github.com/antxprotocol/**
+# Re-ignore other github.com subdirectories
+golang/vendor/github.com/*
+!golang/vendor/github.com/antxprotocol/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+*.manifest
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+.pytype/
+.pyre/
+
+# Python virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Go
+*.test
+*.prof
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.bak
+*.tmp
+
+# Private keys and secrets
+*.key
+*.pem
+.test_private_key
+*_private_key*
+.env
+.env.local
+python/scripts

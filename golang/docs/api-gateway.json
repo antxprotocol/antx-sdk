@@ -1,0 +1,4081 @@
+{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "https"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "title": "ANTX SDK"
+  },
+  "host": "127.0.0.1",
+  "basePath": "/",
+  "paths": {
+    "/api/v1/address/getAddressInfo": {
+      "get": {
+        "description": "Get accountNumber and sequence for the address",
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "subaccount"
+        ],
+        "summary": "getAddressInfo",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "address",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "exist",
+                    "accountNumber",
+                    "sequence"
+                  ],
+                  "properties": {
+                    "accountNumber": {
+                      "type": "string"
+                    },
+                    "exist": {
+                      "type": "boolean"
+                    },
+                    "sequence": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "msg": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "requestTime": {
+                  "type": "string"
+                },
+                "responseTime": {
+                  "type": "string"
+                },
+                "traceId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/subaccount/getSubaccount": {
+      "get": {
+        "description": "Get user information by ETH address",
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "subaccount"
+        ],
+        "summary": "getSubaccountInfo",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Chain type",
+            "name": "chainType",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Chain address",
+            "name": "chainAddress",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Agent address",
+            "name": "agentAddress",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "subaccountList",
+                    "accountNumber",
+                    "sequence"
+                  ],
+                  "properties": {
+                    "accountNumber": {
+                      "description": "Account number",
+                      "type": "string"
+                    },
+                    "sequence": {
+                      "description": "Sequence",
+                      "type": "string"
+                    },
+                    "subaccountList": {
+                      "description": "Subaccount list",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "chainType",
+                          "chainAddress",
+                          "clientAccountId",
+                          "isSystemAccount",
+                          "takerFeeRatePpm",
+                          "makerFeeRatePpm",
+                          "tradeSetting"
+                        ],
+                        "properties": {
+                          "chainAddress": {
+                            "description": "Chain address",
+                            "type": "string"
+                          },
+                          "chainType": {
+                            "description": "Chain type",
+                            "type": "integer"
+                          },
+                          "clientAccountId": {
+                            "description": "Client custom ID, for idempotency check, max length 64",
+                            "type": "string"
+                          },
+                          "id": {
+                            "description": "Subaccount ID, must be greater than 0",
+                            "type": "string"
+                          },
+                          "isSystemAccount": {
+                            "description": "Whether it is a system account",
+                            "type": "boolean"
+                          },
+                          "makerFeeRatePpm": {
+                            "description": "Maker fee rate, unit: parts per million",
+                            "type": "integer"
+                          },
+                          "takerFeeRatePpm": {
+                            "description": "Taker fee rate, unit: parts per million",
+                            "type": "integer"
+                          },
+                          "tradeSetting": {
+                            "description": "Perpetual contract trading settings",
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "required": [
+                                "exchangeId",
+                                "marginMode",
+                                "leverage"
+                              ],
+                              "properties": {
+                                "exchangeId": {
+                                  "description": "Exchange ID",
+                                  "type": "string"
+                                },
+                                "leverage": {
+                                  "description": "Leverage multiplier",
+                                  "type": "integer"
+                                },
+                                "marginMode": {
+                                  "description": "Margin mode 0: Unknown 1: Cross 2: Isolated",
+                                  "type": "integer"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "msg": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "requestTime": {
+                  "type": "string"
+                },
+                "responseTime": {
+                  "type": "string"
+                },
+                "traceId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trade/getActiveOrder": {
+      "get": {
+        "description": "Get active orders for account with pagination",
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "Perpetual Contract Related"
+        ],
+        "summary": "getActiveOrder",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Subaccount ID",
+            "name": "subaccountId",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "Number of records, must be greater than 0 and less than or equal to 100",
+            "name": "size",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Offset data",
+            "name": "offsetData",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Pagination offset data, creation time",
+            "name": "pageOffsetDataCreatedTime",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Pagination offset data, itemId",
+            "name": "pageOffsetDataItemId",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Filter active orders for specific contract, if empty, get all active orders for all contracts",
+            "name": "filterExchangeIdList",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Filter orders by specified status, if empty, get all orders regardless of status",
+            "name": "filterOrderStatusList",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Filter orders by whether they are liquidation orders, if empty, get all orders",
+            "name": "filterIsLiquidateList",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Filter orders by whether they are deleverage orders, if empty, get all orders",
+            "name": "filterIsDeleverageList",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Filter orders by whether they are position take-profit/stop-loss orders, if empty, get all orders",
+            "name": "filterIsPositionTpslList",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Filter orders by specified order ID, if empty, get all orders",
+            "name": "filterOrderIdList",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "description": "Filter orders created at or after specified start time, if empty or 0, start from earliest",
+            "name": "filterStartCreatedTimeInclusive",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "description": "Filter orders created before specified end time, if empty or 0, go to latest",
+            "name": "filterEndCreatedTimeExclusive",
+            "in": "query",
+            "allowEmptyValue": true
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "orderList",
+                    "nextPageOffset"
+                  ],
+                  "properties": {
+                    "nextPageOffset": {
+                      "description": "Next page offset data",
+                      "type": "object",
+                      "required": [
+                        "createTime",
+                        "itemId"
+                      ],
+                      "properties": {
+                        "createTime": {
+                          "description": "next page offset data, creation time",
+                          "type": "string"
+                        },
+                        "itemId": {
+                          "description": "next page offset data, itemId",
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "orderList": {
+                      "description": "Order list",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "subaccountId",
+                          "coinId",
+                          "exchangeId",
+                          "isBuy",
+                          "price",
+                          "size",
+                          "clientOrderId",
+                          "timeInForce",
+                          "reduceOnly",
+                          "expireTime",
+                          "isPositionTp",
+                          "isPositionSl",
+                          "isLiquidate",
+                          "isDeleverage",
+                          "triggerType",
+                          "triggerPriceType",
+                          "triggerPrice",
+                          "openTpSlParentOrderId",
+                          "isSetOpenTp",
+                          "openTpParam",
+                          "isSetOpenSl",
+                          "openSlParam",
+                          "marginMode",
+                          "leverage",
+                          "takerFeeRatePpm",
+                          "makerFeeRatePpm",
+                          "liquidateFeeRatePpm",
+                          "addOrderBookBlockHeight",
+                          "addOrderBookBlockTime",
+                          "addOrderBookTransactionIndex",
+                          "addOrderBookOperationIndex",
+                          "status",
+                          "cancelReason",
+                          "cumFillSize",
+                          "cumFillValue",
+                          "cumFillFee",
+                          "cumLiquidateFee",
+                          "maxFillPrice",
+                          "minFillPrice",
+                          "cumRealizePnl",
+                          "createdTime",
+                          "updatedTime"
+                        ],
+                        "properties": {
+                          "addOrderBookBlockHeight": {
+                            "description": "Block height when order was added to order book, if 0, not triggered yet",
+                            "type": "integer"
+                          },
+                          "addOrderBookBlockTime": {
+                            "description": "Block time when order was added to order book, if 0, not triggered yet",
+                            "type": "integer"
+                          },
+                          "addOrderBookOperationIndex": {
+                            "description": "Operation index in transaction when order was added to order book",
+                            "type": "string"
+                          },
+                          "addOrderBookTransactionIndex": {
+                            "description": "Transaction index in block when order was added to order book",
+                            "type": "string"
+                          },
+                          "cancelReason": {
+                            "description": "Order cancellation reason",
+                            "type": "integer"
+                          },
+                          "clientOrderId": {
+                            "description": "Client custom ID, for idempotency check, max length 64",
+                            "type": "string"
+                          },
+                          "coinId": {
+                            "description": "Trading coin ID",
+                            "type": "string"
+                          },
+                          "createdTime": {
+                            "description": "Created time",
+                            "type": "integer"
+                          },
+                          "cumFillFee": {
+                            "description": "Cumulative filled fee, actual type is decimal",
+                            "type": "string"
+                          },
+                          "cumFillSize": {
+                            "description": "Cumulative filled size, actual type is decimal",
+                            "type": "string"
+                          },
+                          "cumFillValue": {
+                            "description": "Cumulative filled value, actual type is decimal",
+                            "type": "string"
+                          },
+                          "cumLiquidateFee": {
+                            "description": "Cumulative liquidation fee, actual type is decimal",
+                            "type": "string"
+                          },
+                          "cumRealizePnl": {
+                            "description": "Cumulative realized PnL, actual type is decimal",
+                            "type": "string"
+                          },
+                          "exchangeId": {
+                            "description": "Exchange ID",
+                            "type": "string"
+                          },
+                          "expireTime": {
+                            "description": "Expiration time, unit: milliseconds",
+                            "type": "integer"
+                          },
+                          "id": {
+                            "description": "Order ID",
+                            "type": "string"
+                          },
+                          "isBuy": {
+                            "description": "Whether it is a buy order",
+                            "type": "boolean"
+                          },
+                          "isDeleverage": {
+                            "description": "Whether it is an auto-deleverage order",
+                            "type": "boolean"
+                          },
+                          "isLiquidate": {
+                            "description": "Whether it is a liquidation order",
+                            "type": "boolean"
+                          },
+                          "isPositionSl": {
+                            "description": "Whether it is a position take-profit/stop-loss order",
+                            "type": "boolean"
+                          },
+                          "isPositionTp": {
+                            "description": "Whether it is a position take-profit/stop-loss order",
+                            "type": "boolean"
+                          },
+                          "isSetOpenSl": {
+                            "description": "Whether to set open stop-loss",
+                            "type": "boolean"
+                          },
+                          "isSetOpenTp": {
+                            "description": "Whether to set open take-profit",
+                            "type": "boolean"
+                          },
+                          "leverage": {
+                            "description": "Leverage multiplier when placing order",
+                            "type": "integer"
+                          },
+                          "liquidateFeeRatePpm": {
+                            "description": "Liquidation fee rate when placing order, unit: parts per million",
+                            "type": "integer"
+                          },
+                          "makerFeeRatePpm": {
+                            "description": "Maker fee rate when placing order, unit: parts per million",
+                            "type": "integer"
+                          },
+                          "marginMode": {
+                            "description": "Margin mode when placing order",
+                            "type": "integer"
+                          },
+                          "maxFillPrice": {
+                            "description": "Maximum fill price for current order, actual type is decimal",
+                            "type": "string"
+                          },
+                          "minFillPrice": {
+                            "description": "Minimum fill price for current order, actual type is decimal",
+                            "type": "string"
+                          },
+                          "openSlParam": {
+                            "description": "Open stop-loss parameters, only meaningful when is_set_open_sl=true",
+                            "type": "object",
+                            "required": [
+                              "price",
+                              "size",
+                              "clientOrderId",
+                              "triggerPriceType",
+                              "triggerPrice",
+                              "expireTime"
+                            ],
+                            "properties": {
+                              "clientOrderId": {
+                                "description": "Client custom ID, for idempotency check, max length 64",
+                                "type": "string"
+                              },
+                              "expireTime": {
+                                "description": "Expiration time",
+                                "type": "integer"
+                              },
+                              "price": {
+                                "description": "Order price, market order fill 0",
+                                "type": "string"
+                              },
+                              "size": {
+                                "description": "Order size",
+                                "type": "string"
+                              },
+                              "triggerPrice": {
+                                "description": "Trigger price",
+                                "type": "string"
+                              },
+                              "triggerPriceType": {
+                                "description": "Trigger price type",
+                                "type": "integer"
+                              }
+                            }
+                          },
+                          "openTpParam": {
+                            "description": "Open take-profit parameters, only meaningful when is_set_open_tp=true",
+                            "type": "object",
+                            "required": [
+                              "price",
+                              "size",
+                              "clientOrderId",
+                              "triggerPriceType",
+                              "triggerPrice",
+                              "expireTime"
+                            ],
+                            "properties": {
+                              "clientOrderId": {
+                                "description": "Client custom ID, for idempotency check, max length 64",
+                                "type": "string"
+                              },
+                              "expireTime": {
+                                "description": "Expiration time",
+                                "type": "integer"
+                              },
+                              "price": {
+                                "description": "Order price, market order fill 0",
+                                "type": "string"
+                              },
+                              "size": {
+                                "description": "Order size",
+                                "type": "string"
+                              },
+                              "triggerPrice": {
+                                "description": "Trigger price",
+                                "type": "string"
+                              },
+                              "triggerPriceType": {
+                                "description": "Trigger price type",
+                                "type": "integer"
+                              }
+                            }
+                          },
+                          "openTpSlParentOrderId": {
+                            "description": "Open order ID for open take-profit/stop-loss orders",
+                            "type": "string"
+                          },
+                          "price": {
+                            "description": "Order price, if price=0 then it's a market order",
+                            "type": "string"
+                          },
+                          "reduceOnly": {
+                            "description": "Whether it is a reduce-only order",
+                            "type": "boolean"
+                          },
+                          "size": {
+                            "description": "Order size",
+                            "type": "string"
+                          },
+                          "status": {
+                            "description": "Order status",
+                            "type": "integer"
+                          },
+                          "subaccountId": {
+                            "description": "Subaccount ID",
+                            "type": "string"
+                          },
+                          "takerFeeRatePpm": {
+                            "description": "Taker fee rate when placing order, unit: parts per million",
+                            "type": "integer"
+                          },
+                          "timeInForce": {
+                            "description": "Order execution strategy",
+                            "type": "integer"
+                          },
+                          "triggerPrice": {
+                            "description": "Trigger price",
+                            "type": "string"
+                          },
+                          "triggerPriceType": {
+                            "description": "Conditional order trigger price type",
+                            "type": "integer"
+                          },
+                          "triggerType": {
+                            "description": "Conditional order trigger type",
+                            "type": "integer"
+                          },
+                          "updatedTime": {
+                            "description": "Updated time",
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "msg": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "requestTime": {
+                  "type": "string"
+                },
+                "responseTime": {
+                  "type": "string"
+                },
+                "traceId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trade/getAssetSnapshot": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "Perpetual Contract Related"
+        ],
+        "summary": "Get account history asset snapshots",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Subaccount ID",
+            "name": "subaccountId",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "Number of records",
+            "name": "size",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Pagination offset data, creation time",
+            "name": "pageOffsetDataCreatedTime",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Pagination offset data, itemId",
+            "name": "pageOffsetDataItemId",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Filter asset snapshots for specific coins, if empty, get all coins' asset snapshots",
+            "name": "filterCoinId",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Filter asset snapshots by time type, 0 for hourly, 1 for daily",
+            "name": "filterTimeTag",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "description": "Filter asset snapshots created at or after specified start time, if empty or 0, start from earliest",
+            "name": "filterStartCreatedTimeInclusive",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "description": "Filter asset snapshots created before specified end time, if empty or 0, go to latest",
+            "name": "filterEndCreatedTimeExclusive",
+            "in": "query",
+            "allowEmptyValue": true
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "assetSnapshotList",
+                    "nextPageOffset"
+                  ],
+                  "properties": {
+                    "assetSnapshotList": {
+                      "description": "Asset snapshot list",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "subaccountId",
+                          "coinId",
+                          "snapshotTime",
+                          "totalEquity",
+                          "totalRealizePnl",
+                          "termRealizePnl",
+                          "termFillValue",
+                          "termDepositAmount",
+                          "termWithdrawAmount"
+                        ],
+                        "properties": {
+                          "coinId": {
+                            "description": "Coin ID",
+                            "type": "string"
+                          },
+                          "snapshotTime": {
+                            "description": "Snapshot time",
+                            "type": "integer"
+                          },
+                          "subaccountId": {
+                            "description": "Subaccount ID",
+                            "type": "string"
+                          },
+                          "termDepositAmount": {
+                            "description": "Term deposit amount",
+                            "type": "string"
+                          },
+                          "termFillValue": {
+                            "description": "Term fill value (currently only returned when time_tag is 1)",
+                            "type": "string"
+                          },
+                          "termRealizePnl": {
+                            "description": "Term realized PnL",
+                            "type": "string"
+                          },
+                          "termWithdrawAmount": {
+                            "description": "Term withdrawal amount",
+                            "type": "string"
+                          },
+                          "totalEquity": {
+                            "description": "Total collateral value",
+                            "type": "string"
+                          },
+                          "totalRealizePnl": {
+                            "description": "Total realized PnL",
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "nextPageOffset": {
+                      "description": "Next page offset data",
+                      "type": "object",
+                      "required": [
+                        "createTime",
+                        "itemId"
+                      ],
+                      "properties": {
+                        "createTime": {
+                          "description": "next page offset data, creation time",
+                          "type": "string"
+                        },
+                        "itemId": {
+                          "description": "next page offset data, itemId",
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "msg": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "requestTime": {
+                  "type": "string"
+                },
+                "responseTime": {
+                  "type": "string"
+                },
+                "traceId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trade/getCoinList": {
+      "get": {
+        "description": "Get coin list",
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "Trading Related"
+        ],
+        "summary": "getCoinList",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "coinList"
+                  ],
+                  "properties": {
+                    "coinList": {
+                      "description": "Coin list",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "symbol",
+                          "stepSizeScale",
+                          "assetChainId",
+                          "assetContractAddress"
+                        ],
+                        "properties": {
+                          "assetChainId": {
+                            "description": "Asset chain ID",
+                            "type": "string"
+                          },
+                          "assetContractAddress": {
+                            "description": "Asset contract address",
+                            "type": "string"
+                          },
+                          "id": {
+                            "description": "Coin ID, range [1001, 9999], incrementally set",
+                            "type": "string"
+                          },
+                          "stepSizeScale": {
+                            "description": "Decimal places for minimum unit quantity, i.e., minimum unit = 10^-step_size_scale, e.g., step_size_scale=6 means 0.000001, range [-100, 100]",
+                            "type": "integer"
+                          },
+                          "symbol": {
+                            "description": "Coin symbol, max length 32, e.g., 'BTC'",
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "msg": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "requestTime": {
+                  "type": "string"
+                },
+                "responseTime": {
+                  "type": "string"
+                },
+                "traceId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trade/getCollateralTransaction": {
+      "get": {
+        "description": "Get collateral transactions with pagination",
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "Perpetual Contract Related"
+        ],
+        "summary": "getCollateralTransaction",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Subaccount ID",
+            "name": "subaccountId",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "Number of records",
+            "name": "size",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Pagination offset data, creation time",
+            "name": "pageOffsetDataCreatedTime",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Pagination offset data, itemId",
+            "name": "pageOffsetDataItemId",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Transaction types, multiple transaction types separated by commas",
+            "name": "filterTypeList",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "description": "Filter collateral transactions created at or after specified start time, if empty or 0 start from earliest",
+            "name": "filterStartCreatedTimeInclusive",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "description": "Filter collateral transactions created before specified end time, if empty or 0 get until latest",
+            "name": "filterEndCreatedTimeExclusive",
+            "in": "query",
+            "allowEmptyValue": true
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "collateralTransactionList",
+                    "pageOffsetData"
+                  ],
+                  "properties": {
+                    "collateralTransactionList": {
+                      "description": "Collateral transaction list",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "subaccountId",
+                          "coinId",
+                          "type",
+                          "deltaAmount",
+                          "deltaLegacyAmount",
+                          "beforeAmount",
+                          "beforeLegacyAmount",
+                          "transferPeerSubaccountId",
+                          "transferPeerExchangeType",
+                          "transferReason",
+                          "transferRemark",
+                          "fillSize",
+                          "fillValue",
+                          "fillFee",
+                          "fillPrice",
+                          "liqFee",
+                          "realizePnl",
+                          "isPositionTp",
+                          "isPositionSl",
+                          "isLiquidate",
+                          "isDeleverage",
+                          "fundingTime",
+                          "fundingRate",
+                          "fundingIndexPrice",
+                          "fundingOraclePrice",
+                          "fundingPositionSize",
+                          "exchangeId",
+                          "orderId",
+                          "orderFillTransactionId",
+                          "orderSubaccountId",
+                          "positionTransactionId",
+                          "blockHeight",
+                          "blockTime",
+                          "transactionIndex",
+                          "eventIndex",
+                          "createdTime",
+                          "updatedTime"
+                        ],
+                        "properties": {
+                          "beforeAmount": {
+                            "description": "Collateral amount before change",
+                            "type": "string"
+                          },
+                          "beforeLegacyAmount": {
+                            "description": "Legacy accounting balance field before change",
+                            "type": "string"
+                          },
+                          "blockHeight": {
+                            "description": "Block height",
+                            "type": "integer"
+                          },
+                          "blockTime": {
+                            "description": "Block time",
+                            "type": "integer"
+                          },
+                          "coinId": {
+                            "description": "Coin ID",
+                            "type": "string"
+                          },
+                          "createdTime": {
+                            "description": "Created time",
+                            "type": "integer"
+                          },
+                          "deltaAmount": {
+                            "description": "Collateral change amount",
+                            "type": "string"
+                          },
+                          "deltaLegacyAmount": {
+                            "description": "Legacy accounting balance field change amount",
+                            "type": "string"
+                          },
+                          "eventIndex": {
+                            "description": "Event index",
+                            "type": "string"
+                          },
+                          "exchangeId": {
+                            "description": "Associated position contract ID",
+                            "type": "string"
+                          },
+                          "fillFee": {
+                            "description": "Fill fee (usually zero or negative)",
+                            "type": "string"
+                          },
+                          "fillPrice": {
+                            "description": "Fill price (not precise, for display only)",
+                            "type": "string"
+                          },
+                          "fillSize": {
+                            "description": "Fill size (positive for buy, negative for sell)",
+                            "type": "string"
+                          },
+                          "fillValue": {
+                            "description": "Fill value (positive for buy, negative for sell)",
+                            "type": "string"
+                          },
+                          "fundingIndexPrice": {
+                            "description": "Funding rate related index price",
+                            "type": "string"
+                          },
+                          "fundingOraclePrice": {
+                            "description": "Funding rate related oracle price",
+                            "type": "string"
+                          },
+                          "fundingPositionSize": {
+                            "description": "Position size at funding fee settlement (positive for long, negative for short)",
+                            "type": "string"
+                          },
+                          "fundingRate": {
+                            "description": "Funding rate",
+                            "type": "string"
+                          },
+                          "fundingTime": {
+                            "description": "Funding rate settlement time",
+                            "type": "integer"
+                          },
+                          "id": {
+                            "description": "Unique identifier",
+                            "type": "string"
+                          },
+                          "isDeleverage": {
+                            "description": "Whether it is an auto-deleverage order",
+                            "type": "boolean"
+                          },
+                          "isLiquidate": {
+                            "description": "Whether it is a liquidation order",
+                            "type": "boolean"
+                          },
+                          "isPositionSl": {
+                            "description": "Whether it is a position take-profit/stop-loss order",
+                            "type": "boolean"
+                          },
+                          "isPositionTp": {
+                            "description": "Whether it is a position take-profit/stop-loss order",
+                            "type": "boolean"
+                          },
+                          "liqFee": {
+                            "description": "Liquidation fee (exists when there is close fill, usually zero or negative)",
+                            "type": "string"
+                          },
+                          "orderFillTransactionId": {
+                            "description": "Associated order fill transaction ID",
+                            "type": "string"
+                          },
+                          "orderId": {
+                            "description": "Associated order ID",
+                            "type": "string"
+                          },
+                          "orderSubaccountId": {
+                            "description": "Associated order subaccount ID",
+                            "type": "string"
+                          },
+                          "positionTransactionId": {
+                            "description": "Associated position transaction ID",
+                            "type": "string"
+                          },
+                          "realizePnl": {
+                            "description": "Realized PnL (exists when there is close fill, not precise, for display only)",
+                            "type": "string"
+                          },
+                          "subaccountId": {
+                            "description": "Subaccount ID",
+                            "type": "string"
+                          },
+                          "transactionIndex": {
+                            "description": "Transaction index",
+                            "type": "string"
+                          },
+                          "transferPeerExchangeType": {
+                            "description": "Transfer peer account exchange type",
+                            "type": "integer"
+                          },
+                          "transferPeerSubaccountId": {
+                            "description": "Transfer peer subaccount ID",
+                            "type": "string"
+                          },
+                          "transferReason": {
+                            "description": "Transfer reason",
+                            "type": "integer"
+                          },
+                          "transferRemark": {
+                            "description": "Transfer remark",
+                            "type": "string"
+                          },
+                          "type": {
+                            "description": "Transaction type",
+                            "type": "integer"
+                          },
+                          "updatedTime": {
+                            "description": "Updated time",
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    },
+                    "pageOffsetData": {
+                      "description": "Next page offset data",
+                      "type": "object",
+                      "required": [
+                        "createTime",
+                        "itemId"
+                      ],
+                      "properties": {
+                        "createTime": {
+                          "description": "next page offset data, creation time",
+                          "type": "string"
+                        },
+                        "itemId": {
+                          "description": "next page offset data, itemId",
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "msg": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "requestTime": {
+                  "type": "string"
+                },
+                "responseTime": {
+                  "type": "string"
+                },
+                "traceId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trade/getExchangeList": {
+      "get": {
+        "description": "Get exchange list",
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "Trading Related"
+        ],
+        "summary": "getExchangeList",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "exchangeList"
+                  ],
+                  "properties": {
+                    "exchangeList": {
+                      "description": "Exchange list",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "symbol",
+                          "baseCoinId",
+                          "quoteCoinId",
+                          "stepSizeScale",
+                          "tickSizeScale",
+                          "orderPriceMaxRatioPpm",
+                          "orderPriceMinRatioPpm",
+                          "orderSizeMax",
+                          "perpetual"
+                        ],
+                        "properties": {
+                          "baseCoinId": {
+                            "description": "Base coin ID, e.g., BTC",
+                            "type": "string"
+                          },
+                          "id": {
+                            "description": "Exchange ID, must be incrementally set, spot range [100001, 109999], perpetual range [200001, 209999]",
+                            "type": "string"
+                          },
+                          "orderPriceMaxRatioPpm": {
+                            "description": "Maximum order price limit ratio (compared to oracle price), unit: parts per million",
+                            "type": "integer"
+                          },
+                          "orderPriceMinRatioPpm": {
+                            "description": "Minimum order price limit ratio (compared to oracle price), unit: parts per million",
+                            "type": "integer"
+                          },
+                          "orderSizeMax": {
+                            "description": "Maximum order size",
+                            "type": "string"
+                          },
+                          "perpetual": {
+                            "description": "Perpetual contract trading information",
+                            "type": "object",
+                            "required": [
+                              "supportMarginModeList",
+                              "riskTierList",
+                              "liquidateFeeRatePpm",
+                              "defaultLeverage",
+                              "enableOrderCreate",
+                              "enableOrderFill",
+                              "enablePositionOpen",
+                              "fundingInterestRatePpm",
+                              "fundingImpactMarginNotional",
+                              "fundingRateAbsMaxPpm",
+                              "fundingRateIntervalMinutes"
+                            ],
+                            "properties": {
+                              "defaultLeverage": {
+                                "description": "Default leverage multiplier",
+                                "type": "integer"
+                              },
+                              "enableOrderCreate": {
+                                "description": "Whether order creation is allowed",
+                                "type": "boolean"
+                              },
+                              "enableOrderFill": {
+                                "description": "Whether order fill is allowed",
+                                "type": "boolean"
+                              },
+                              "enablePositionOpen": {
+                                "description": "Whether position opening is allowed",
+                                "type": "boolean"
+                              },
+                              "fundingImpactMarginNotional": {
+                                "description": "Funding impact margin notional",
+                                "type": "string"
+                              },
+                              "fundingInterestRatePpm": {
+                                "description": "Funding interest rate",
+                                "type": "integer"
+                              },
+                              "fundingRateAbsMaxPpm": {
+                                "description": "Maximum absolute funding rate",
+                                "type": "integer"
+                              },
+                              "fundingRateIntervalMinutes": {
+                                "description": "Funding rate calculation interval",
+                                "type": "integer"
+                              },
+                              "liquidateFeeRatePpm": {
+                                "description": "Default liquidation fee rate, unit: parts per million",
+                                "type": "integer"
+                              },
+                              "riskTierList": {
+                                "description": "Risk tier list (must be sorted by max leverage descending, maintenance margin ratio ascending, position value ascending)",
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "required": [
+                                    "maxLeverage",
+                                    "maintenanceMarginRatioPpm",
+                                    "positionValueUpperBound"
+                                  ],
+                                  "properties": {
+                                    "maintenanceMarginRatioPpm": {
+                                      "description": "Maintenance margin ratio",
+                                      "type": "integer"
+                                    },
+                                    "maxLeverage": {
+                                      "description": "Maximum leverage multiplier",
+                                      "type": "integer"
+                                    },
+                                    "positionValueUpperBound": {
+                                      "description": "Position value upper bound",
+                                      "type": "string"
+                                    }
+                                  }
+                                }
+                              },
+                              "supportMarginModeList": {
+                                "description": "Supported margin modes",
+                                "type": "array",
+                                "items": {
+                                  "type": "integer"
+                                }
+                              }
+                            }
+                          },
+                          "quoteCoinId": {
+                            "description": "Quote coin ID, e.g., USDT",
+                            "type": "string"
+                          },
+                          "stepSizeScale": {
+                            "description": "Decimal places for minimum position unit, i.e., minimum unit = 10^-step_size_scale, e.g., step_size_scale=6 means 0.000001",
+                            "type": "integer"
+                          },
+                          "symbol": {
+                            "description": "Exchange symbol, e.g., BTC/USDT, BTC-USDT",
+                            "type": "string"
+                          },
+                          "tickSizeScale": {
+                            "description": "Decimal places for minimum price unit, i.e., minimum unit = 10^-tick_size_scale, e.g., tick_size_scale=-1 means 10",
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "msg": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "requestTime": {
+                  "type": "string"
+                },
+                "responseTime": {
+                  "type": "string"
+                },
+                "traceId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trade/getFundingHistory": {
+      "get": {
+        "description": "Get funding rate history",
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "Trading Related"
+        ],
+        "summary": "getFundingHistory",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Exchange ID",
+            "name": "exchangeId",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "Number of records, must be greater than 0 and less than or equal to 100",
+            "name": "size",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Pagination offset, if empty, get first page",
+            "name": "offsetData",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "boolean",
+            "description": "true to only query settlement funding rates (settled every 8 hours, predicted rate calculated every minute)",
+            "name": "filterSettlementFundingRate",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "description": "Start time, if empty, get oldest data",
+            "name": "filterBeginTimeInclusive",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "description": "End time, if empty, get latest data",
+            "name": "filterEndTimeExclusive",
+            "in": "query",
+            "allowEmptyValue": true
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "fundingRateList",
+                    "nextPageOffsetData"
+                  ],
+                  "properties": {
+                    "fundingRateList": {
+                      "description": "Funding rate list",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "exchangeId",
+                          "fundingTime",
+                          "fundingCalculateTime",
+                          "fundingRate",
+                          "oraclePrice",
+                          "indexPrice",
+                          "isSettlement",
+                          "forecastFundingRate",
+                          "previousFundingRate",
+                          "previousFundingCalculateTime",
+                          "premiumIndex",
+                          "avgPremiumIndex",
+                          "premiumIndexCalculateTime",
+                          "impactMarginNotional",
+                          "impactAskPrice",
+                          "impactBidPrice",
+                          "interestRate",
+                          "predictedFundingRate",
+                          "fundingRateIntervalMinutes"
+                        ],
+                        "properties": {
+                          "avgPremiumIndex": {
+                            "description": "Average premium index",
+                            "type": "string"
+                          },
+                          "exchangeId": {
+                            "description": "Contract ID",
+                            "type": "string"
+                          },
+                          "forecastFundingRate": {
+                            "description": "Forecast funding rate",
+                            "type": "string"
+                          },
+                          "fundingCalculateTime": {
+                            "description": "Rate calculation time in milliseconds",
+                            "type": "string"
+                          },
+                          "fundingRate": {
+                            "description": "Funding rate",
+                            "type": "string"
+                          },
+                          "fundingRateIntervalMinutes": {
+                            "description": "Funding rate interval in minutes",
+                            "type": "integer"
+                          },
+                          "fundingTime": {
+                            "description": "Funding rate time",
+                            "type": "integer"
+                          },
+                          "impactAskPrice": {
+                            "description": "Depth-weighted best ask price",
+                            "type": "string"
+                          },
+                          "impactBidPrice": {
+                            "description": "Depth-weighted best bid price",
+                            "type": "string"
+                          },
+                          "impactMarginNotional": {
+                            "description": "Impact margin notional for depth-weighted price calculation",
+                            "type": "string"
+                          },
+                          "indexPrice": {
+                            "description": "Index price",
+                            "type": "string"
+                          },
+                          "interestRate": {
+                            "description": "(Config field) Fixed interest rate",
+                            "type": "string"
+                          },
+                          "isSettlement": {
+                            "description": "Whether it is a settlement",
+                            "type": "boolean"
+                          },
+                          "oraclePrice": {
+                            "description": "Oracle price",
+                            "type": "string"
+                          },
+                          "predictedFundingRate": {
+                            "description": "Combined rate interestRate/frequency",
+                            "type": "string"
+                          },
+                          "premiumIndex": {
+                            "description": "Premium index",
+                            "type": "string"
+                          },
+                          "premiumIndexCalculateTime": {
+                            "description": "Premium index calculation time",
+                            "type": "string"
+                          },
+                          "previousFundingCalculateTime": {
+                            "description": "Previous funding rate calculation time in milliseconds",
+                            "type": "string"
+                          },
+                          "previousFundingRate": {
+                            "description": "Previous funding rate",
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "nextPageOffsetData": {
+                      "description": "Next page offset, if no next page, empty string",
+                      "type": "string"
+                    }
+                  }
+                },
+                "msg": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "requestTime": {
+                  "type": "string"
+                },
+                "responseTime": {
+                  "type": "string"
+                },
+                "traceId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trade/getHistoryOrder": {
+      "get": {
+        "description": "Get historical orders for account with pagination",
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "Perpetual Contract Related"
+        ],
+        "summary": "getHistoryOrder",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Subaccount ID",
+            "name": "subaccountId",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "Number of records",
+            "name": "size",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Pagination offset data, creation time",
+            "name": "pageOffsetDataCreatedTime",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Pagination offset data, itemId",
+            "name": "pageOffsetDataItemId",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Filter history orders for specific contracts, if empty, get all contracts' history orders",
+            "name": "filterExchangeIdList",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Filter orders by whether they are buy orders, if empty, get all orders",
+            "name": "filterIsBuyList",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Filter orders by specified status, if empty, get all orders regardless of status",
+            "name": "filterOrderStatusList",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Filter orders by whether they are liquidation orders, if empty, get all orders",
+            "name": "filterIsLiquidateList",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Filter orders by whether they are deleverage orders, if empty, get all orders",
+            "name": "filterIsDeleverageList",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Filter orders by whether they are position take-profit/stop-loss orders, if empty, get all orders",
+            "name": "filterIsPositionTpList",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Filter orders by whether they are position take-profit/stop-loss orders, if empty, get all orders",
+            "name": "filterIsPositionSlList",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Filter orders by specified order IDs, if empty, get all orders",
+            "name": "filterOrderIdList",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "description": "Filter orders created at or after specified start time, if empty or 0, start from earliest",
+            "name": "filterStartCreatedTimeInclusive",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "description": "Filter orders created before specified end time, if empty or 0, go to latest",
+            "name": "filterEndCreatedTimeExclusive",
+            "in": "query",
+            "allowEmptyValue": true
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "orderList",
+                    "nextPageOffset"
+                  ],
+                  "properties": {
+                    "nextPageOffset": {
+                      "description": "Next page offset data",
+                      "type": "object",
+                      "required": [
+                        "createTime",
+                        "itemId"
+                      ],
+                      "properties": {
+                        "createTime": {
+                          "description": "next page offset data, creation time",
+                          "type": "string"
+                        },
+                        "itemId": {
+                          "description": "next page offset data, itemId",
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "orderList": {
+                      "description": "Order list",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "subaccountId",
+                          "coinId",
+                          "exchangeId",
+                          "isBuy",
+                          "price",
+                          "size",
+                          "clientOrderId",
+                          "timeInForce",
+                          "reduceOnly",
+                          "expireTime",
+                          "isPositionTp",
+                          "isPositionSl",
+                          "isLiquidate",
+                          "isDeleverage",
+                          "triggerType",
+                          "triggerPriceType",
+                          "triggerPrice",
+                          "openTpSlParentOrderId",
+                          "isSetOpenTp",
+                          "openTpParam",
+                          "isSetOpenSl",
+                          "openSlParam",
+                          "marginMode",
+                          "leverage",
+                          "takerFeeRatePpm",
+                          "makerFeeRatePpm",
+                          "liquidateFeeRatePpm",
+                          "addOrderBookBlockHeight",
+                          "addOrderBookBlockTime",
+                          "addOrderBookTransactionIndex",
+                          "addOrderBookOperationIndex",
+                          "status",
+                          "cancelReason",
+                          "cumFillSize",
+                          "cumFillValue",
+                          "cumFillFee",
+                          "cumLiquidateFee",
+                          "maxFillPrice",
+                          "minFillPrice",
+                          "cumRealizePnl",
+                          "createdTime",
+                          "updatedTime"
+                        ],
+                        "properties": {
+                          "addOrderBookBlockHeight": {
+                            "description": "Block height when order was added to order book, if 0, not triggered yet",
+                            "type": "integer"
+                          },
+                          "addOrderBookBlockTime": {
+                            "description": "Block time when order was added to order book, if 0, not triggered yet",
+                            "type": "integer"
+                          },
+                          "addOrderBookOperationIndex": {
+                            "description": "Operation index in transaction when order was added to order book",
+                            "type": "string"
+                          },
+                          "addOrderBookTransactionIndex": {
+                            "description": "Transaction index in block when order was added to order book",
+                            "type": "string"
+                          },
+                          "cancelReason": {
+                            "description": "Order cancellation reason",
+                            "type": "integer"
+                          },
+                          "clientOrderId": {
+                            "description": "Client custom ID, for idempotency check, max length 64",
+                            "type": "string"
+                          },
+                          "coinId": {
+                            "description": "Trading coin ID",
+                            "type": "string"
+                          },
+                          "createdTime": {
+                            "description": "Created time",
+                            "type": "integer"
+                          },
+                          "cumFillFee": {
+                            "description": "Cumulative filled fee, actual type is decimal",
+                            "type": "string"
+                          },
+                          "cumFillSize": {
+                            "description": "Cumulative filled size, actual type is decimal",
+                            "type": "string"
+                          },
+                          "cumFillValue": {
+                            "description": "Cumulative filled value, actual type is decimal",
+                            "type": "string"
+                          },
+                          "cumLiquidateFee": {
+                            "description": "Cumulative liquidation fee, actual type is decimal",
+                            "type": "string"
+                          },
+                          "cumRealizePnl": {
+                            "description": "Cumulative realized PnL, actual type is decimal",
+                            "type": "string"
+                          },
+                          "exchangeId": {
+                            "description": "Exchange ID",
+                            "type": "string"
+                          },
+                          "expireTime": {
+                            "description": "Expiration time, unit: milliseconds",
+                            "type": "integer"
+                          },
+                          "id": {
+                            "description": "Order ID",
+                            "type": "string"
+                          },
+                          "isBuy": {
+                            "description": "Whether it is a buy order",
+                            "type": "boolean"
+                          },
+                          "isDeleverage": {
+                            "description": "Whether it is an auto-deleverage order",
+                            "type": "boolean"
+                          },
+                          "isLiquidate": {
+                            "description": "Whether it is a liquidation order",
+                            "type": "boolean"
+                          },
+                          "isPositionSl": {
+                            "description": "Whether it is a position take-profit/stop-loss order",
+                            "type": "boolean"
+                          },
+                          "isPositionTp": {
+                            "description": "Whether it is a position take-profit/stop-loss order",
+                            "type": "boolean"
+                          },
+                          "isSetOpenSl": {
+                            "description": "Whether to set open stop-loss",
+                            "type": "boolean"
+                          },
+                          "isSetOpenTp": {
+                            "description": "Whether to set open take-profit",
+                            "type": "boolean"
+                          },
+                          "leverage": {
+                            "description": "Leverage multiplier when placing order",
+                            "type": "integer"
+                          },
+                          "liquidateFeeRatePpm": {
+                            "description": "Liquidation fee rate when placing order, unit: parts per million",
+                            "type": "integer"
+                          },
+                          "makerFeeRatePpm": {
+                            "description": "Maker fee rate when placing order, unit: parts per million",
+                            "type": "integer"
+                          },
+                          "marginMode": {
+                            "description": "Margin mode when placing order",
+                            "type": "integer"
+                          },
+                          "maxFillPrice": {
+                            "description": "Maximum fill price for current order, actual type is decimal",
+                            "type": "string"
+                          },
+                          "minFillPrice": {
+                            "description": "Minimum fill price for current order, actual type is decimal",
+                            "type": "string"
+                          },
+                          "openSlParam": {
+                            "description": "Open stop-loss parameters, only meaningful when is_set_open_sl=true",
+                            "type": "object",
+                            "required": [
+                              "price",
+                              "size",
+                              "clientOrderId",
+                              "triggerPriceType",
+                              "triggerPrice",
+                              "expireTime"
+                            ],
+                            "properties": {
+                              "clientOrderId": {
+                                "description": "Client custom ID, for idempotency check, max length 64",
+                                "type": "string"
+                              },
+                              "expireTime": {
+                                "description": "Expiration time",
+                                "type": "integer"
+                              },
+                              "price": {
+                                "description": "Order price, market order fill 0",
+                                "type": "string"
+                              },
+                              "size": {
+                                "description": "Order size",
+                                "type": "string"
+                              },
+                              "triggerPrice": {
+                                "description": "Trigger price",
+                                "type": "string"
+                              },
+                              "triggerPriceType": {
+                                "description": "Trigger price type",
+                                "type": "integer"
+                              }
+                            }
+                          },
+                          "openTpParam": {
+                            "description": "Open take-profit parameters, only meaningful when is_set_open_tp=true",
+                            "type": "object",
+                            "required": [
+                              "price",
+                              "size",
+                              "clientOrderId",
+                              "triggerPriceType",
+                              "triggerPrice",
+                              "expireTime"
+                            ],
+                            "properties": {
+                              "clientOrderId": {
+                                "description": "Client custom ID, for idempotency check, max length 64",
+                                "type": "string"
+                              },
+                              "expireTime": {
+                                "description": "Expiration time",
+                                "type": "integer"
+                              },
+                              "price": {
+                                "description": "Order price, market order fill 0",
+                                "type": "string"
+                              },
+                              "size": {
+                                "description": "Order size",
+                                "type": "string"
+                              },
+                              "triggerPrice": {
+                                "description": "Trigger price",
+                                "type": "string"
+                              },
+                              "triggerPriceType": {
+                                "description": "Trigger price type",
+                                "type": "integer"
+                              }
+                            }
+                          },
+                          "openTpSlParentOrderId": {
+                            "description": "Open order ID for open take-profit/stop-loss orders",
+                            "type": "string"
+                          },
+                          "price": {
+                            "description": "Order price, if price=0 then it's a market order",
+                            "type": "string"
+                          },
+                          "reduceOnly": {
+                            "description": "Whether it is a reduce-only order",
+                            "type": "boolean"
+                          },
+                          "size": {
+                            "description": "Order size",
+                            "type": "string"
+                          },
+                          "status": {
+                            "description": "Order status",
+                            "type": "integer"
+                          },
+                          "subaccountId": {
+                            "description": "Subaccount ID",
+                            "type": "string"
+                          },
+                          "takerFeeRatePpm": {
+                            "description": "Taker fee rate when placing order, unit: parts per million",
+                            "type": "integer"
+                          },
+                          "timeInForce": {
+                            "description": "Order execution strategy",
+                            "type": "integer"
+                          },
+                          "triggerPrice": {
+                            "description": "Trigger price",
+                            "type": "string"
+                          },
+                          "triggerPriceType": {
+                            "description": "Conditional order trigger price type",
+                            "type": "integer"
+                          },
+                          "triggerType": {
+                            "description": "Conditional order trigger type",
+                            "type": "integer"
+                          },
+                          "updatedTime": {
+                            "description": "Updated time",
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "msg": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "requestTime": {
+                  "type": "string"
+                },
+                "responseTime": {
+                  "type": "string"
+                },
+                "traceId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trade/getHistoryOrderFillTransaction": {
+      "get": {
+        "description": "Get order fill history for account with pagination",
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "Perpetual Contract Related"
+        ],
+        "summary": "getHistoryOrderFillTransaction",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Subaccount ID",
+            "name": "subaccountId",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "Number of records",
+            "name": "size",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Pagination offset data, creation time",
+            "name": "pageOffsetDataCreatedTime",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Pagination offset data, itemId",
+            "name": "pageOffsetDataItemId",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Filter order fill transactions for specific contracts, if empty, get all contracts' order fill transactions",
+            "name": "filterExchangeIdList",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Filter order fill transactions by whether they are buy orders, if empty, get all order fill transactions",
+            "name": "filterIsBuyList",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Filter order fill transactions by whether they are liquidation orders, if empty, get all order fill transactions",
+            "name": "filterIsLiquidateList",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Filter order fill transactions by whether they are deleverage orders, if empty, get all order fill transactions",
+            "name": "filterIsDeleverageList",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Filter order fill transactions by whether they are position take-profit orders, if empty, get all order fill transactions",
+            "name": "filterIsPositionTpList",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Filter order fill transactions by whether they are position stop-loss orders, if empty, get all order fill transactions",
+            "name": "filterIsPositionSlList",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Filter order fill transactions by specified order IDs, if empty, get all order fill transactions",
+            "name": "filterOrderIdList",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "description": "Filter order fill transactions created at or after specified start time, if empty or 0, start from earliest",
+            "name": "filterStartCreatedTimeInclusive",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "description": "Filter order fill transactions created before specified end time, if empty or 0, go to latest",
+            "name": "filterEndCreatedTimeExclusive",
+            "in": "query",
+            "allowEmptyValue": true
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "orderFillTransactionList",
+                    "nextPageOffset"
+                  ],
+                  "properties": {
+                    "nextPageOffset": {
+                      "description": "Next page offset data",
+                      "type": "object",
+                      "required": [
+                        "createTime",
+                        "itemId"
+                      ],
+                      "properties": {
+                        "createTime": {
+                          "description": "next page offset data, creation time",
+                          "type": "string"
+                        },
+                        "itemId": {
+                          "description": "next page offset data, itemId",
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "orderFillTransactionList": {
+                      "description": "Order fill transaction list",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "subaccountId",
+                          "coinId",
+                          "exchangeId",
+                          "orderId",
+                          "isBuy",
+                          "fillSize",
+                          "fillValue",
+                          "fillFee",
+                          "fillPrice",
+                          "liquidateFee",
+                          "realizePnl",
+                          "isMaker",
+                          "isPositionTp",
+                          "isPositionSl",
+                          "isLiquidate",
+                          "isDeleverage",
+                          "spotAssetTransactionId",
+                          "closePerpetualPositionTransactionId",
+                          "closePerpetualCollateralTransactionId",
+                          "openPerpetualPositionTransactionId",
+                          "openPerpetualCollateralTransactionId",
+                          "blockHeight",
+                          "blockTime",
+                          "transactionIndex",
+                          "eventIndex",
+                          "createdTime",
+                          "updatedTime"
+                        ],
+                        "properties": {
+                          "blockHeight": {
+                            "description": "Block height",
+                            "type": "integer"
+                          },
+                          "blockTime": {
+                            "description": "Block time",
+                            "type": "integer"
+                          },
+                          "closePerpetualCollateralTransactionId": {
+                            "description": "Associated close collateral transaction ID",
+                            "type": "string"
+                          },
+                          "closePerpetualPositionTransactionId": {
+                            "description": "Associated close position transaction ID",
+                            "type": "string"
+                          },
+                          "coinId": {
+                            "description": "Trading coin ID",
+                            "type": "string"
+                          },
+                          "createdTime": {
+                            "description": "Created time",
+                            "type": "integer"
+                          },
+                          "eventIndex": {
+                            "description": "Event index",
+                            "type": "string"
+                          },
+                          "exchangeId": {
+                            "description": "Exchange ID",
+                            "type": "string"
+                          },
+                          "fillFee": {
+                            "description": "Actual fill fee",
+                            "type": "string"
+                          },
+                          "fillPrice": {
+                            "description": "Fill price (not precise, for display only)",
+                            "type": "string"
+                          },
+                          "fillSize": {
+                            "description": "Actual fill size",
+                            "type": "string"
+                          },
+                          "fillValue": {
+                            "description": "Actual fill value",
+                            "type": "string"
+                          },
+                          "id": {
+                            "description": "Unique identifier",
+                            "type": "string"
+                          },
+                          "isBuy": {
+                            "description": "Buy/sell direction",
+                            "type": "boolean"
+                          },
+                          "isDeleverage": {
+                            "description": "Whether it is an auto-deleverage order",
+                            "type": "boolean"
+                          },
+                          "isLiquidate": {
+                            "description": "Whether it is a liquidation (forced close) order",
+                            "type": "boolean"
+                          },
+                          "isMaker": {
+                            "description": "Actual fill direction, whether it is a maker fill",
+                            "type": "boolean"
+                          },
+                          "isPositionSl": {
+                            "description": "Whether it is a position take-profit/stop-loss order",
+                            "type": "boolean"
+                          },
+                          "isPositionTp": {
+                            "description": "Whether it is a position take-profit/stop-loss order",
+                            "type": "boolean"
+                          },
+                          "liquidateFee": {
+                            "description": "If it's a liquidation (forced close) fill, this field is the liquidation fee",
+                            "type": "string"
+                          },
+                          "openPerpetualCollateralTransactionId": {
+                            "description": "Associated open collateral transaction ID",
+                            "type": "string"
+                          },
+                          "openPerpetualPositionTransactionId": {
+                            "description": "Associated open position transaction ID",
+                            "type": "string"
+                          },
+                          "orderId": {
+                            "description": "Order ID",
+                            "type": "string"
+                          },
+                          "realizePnl": {
+                            "description": "Actual realized PnL (only has value when fill includes close)",
+                            "type": "string"
+                          },
+                          "spotAssetTransactionId": {
+                            "description": "Associated spot asset transaction ID",
+                            "type": "string"
+                          },
+                          "subaccountId": {
+                            "description": "Subaccount ID",
+                            "type": "string"
+                          },
+                          "transactionIndex": {
+                            "description": "Transaction index",
+                            "type": "string"
+                          },
+                          "updatedTime": {
+                            "description": "Updated time",
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "msg": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "requestTime": {
+                  "type": "string"
+                },
+                "responseTime": {
+                  "type": "string"
+                },
+                "traceId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trade/getHistoryPositionTerm": {
+      "get": {
+        "description": "Get historical position snapshots",
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "Perpetual Contract Related"
+        ],
+        "summary": "getHistoryPositionTerm",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Subaccount ID",
+            "name": "subaccountId",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "Number of records",
+            "name": "size",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Filter position terms for specific contracts, if empty, get all contracts' position terms",
+            "name": "filterExchangeIdList",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "description": "Filter position terms created at or after specified start time, if empty or 0, start from earliest",
+            "name": "filterStartCreatedTimeInclusive",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "description": "Filter position terms created before specified end time, if empty or 0, go to latest",
+            "name": "filterEndCreatedTimeExclusive",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Pagination offset data, creation time",
+            "name": "pageOffsetDataCreatedTime",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Pagination offset data, itemId",
+            "name": "pageOffsetDataItemId",
+            "in": "query",
+            "allowEmptyValue": true
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "positionTermList",
+                    "nextPageOffset"
+                  ],
+                  "properties": {
+                    "nextPageOffset": {
+                      "description": "Next page offset data",
+                      "type": "object",
+                      "required": [
+                        "createTime",
+                        "itemId"
+                      ],
+                      "properties": {
+                        "createTime": {
+                          "description": "next page offset data, creation time",
+                          "type": "string"
+                        },
+                        "itemId": {
+                          "description": "next page offset data, itemId",
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "positionTermList": {
+                      "description": "Position term list",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "subaccountId",
+                          "coinId",
+                          "exchangeId",
+                          "termCount",
+                          "isIsolated",
+                          "cumOpenSize",
+                          "cumOpenValue",
+                          "cumOpenFee",
+                          "cumCloseSize",
+                          "cumCloseValue",
+                          "cumCloseFee",
+                          "cumFundingFee",
+                          "cumLiquidateFee",
+                          "closeLeverage",
+                          "createdTime",
+                          "updatedTime"
+                        ],
+                        "properties": {
+                          "closeLeverage": {
+                            "description": "Leverage multiplier at complete close, actual type is decimal",
+                            "type": "string"
+                          },
+                          "coinId": {
+                            "description": "Collateral coin ID",
+                            "type": "string"
+                          },
+                          "createdTime": {
+                            "description": "Created time",
+                            "type": "integer"
+                          },
+                          "cumCloseFee": {
+                            "description": "Cumulative close fee",
+                            "type": "string"
+                          },
+                          "cumCloseSize": {
+                            "description": "Cumulative close size",
+                            "type": "string"
+                          },
+                          "cumCloseValue": {
+                            "description": "Cumulative close value",
+                            "type": "string"
+                          },
+                          "cumFundingFee": {
+                            "description": "Cumulative settled funding fee",
+                            "type": "string"
+                          },
+                          "cumLiquidateFee": {
+                            "description": "Cumulative liquidation fee",
+                            "type": "string"
+                          },
+                          "cumOpenFee": {
+                            "description": "Cumulative open fee",
+                            "type": "string"
+                          },
+                          "cumOpenSize": {
+                            "description": "Cumulative open size",
+                            "type": "string"
+                          },
+                          "cumOpenValue": {
+                            "description": "Cumulative open value",
+                            "type": "string"
+                          },
+                          "exchangeId": {
+                            "description": "Perpetual contract ID",
+                            "type": "string"
+                          },
+                          "isIsolated": {
+                            "description": "Whether it is isolated",
+                            "type": "boolean"
+                          },
+                          "subaccountId": {
+                            "description": "Subaccount ID",
+                            "type": "string"
+                          },
+                          "termCount": {
+                            "description": "Term count, starts from 1, increments after complete close and open",
+                            "type": "integer"
+                          },
+                          "updatedTime": {
+                            "description": "Updated time",
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "msg": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "requestTime": {
+                  "type": "string"
+                },
+                "responseTime": {
+                  "type": "string"
+                },
+                "traceId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trade/getKline": {
+      "get": {
+        "description": "Get K-line information\u003cbr\u003e\n\t\tpriceType: Price type, optional values:\u003cbr\u003e\n\t\tPRICE_TYPE_LAST: Latest price\u003cbr\u003e\n\t\tPRICE_TYPE_ASK_BEST: Best ask price\u003cbr\u003e\n\t\tPRICE_TYPE_BID_BEST: Best bid price\u003cbr\u003e\n\t\tPRICE_TYPE_MARK: Mark price\u003cbr\u003e\n\t\tPRICE_TYPE_ORACLE: Oracle price\u003cbr\u003e\n\t\tklineType: Time type, optional values:\u003cbr\u003e\n\t\tMINUTE_1: 1 minute\u003cbr\u003e\n\t\tMINUTE_5: 5 minutes\u003cbr\u003e\n\t\tMINUTE_15: 15 minutes\u003cbr\u003e\n\t\tMINUTE_30: 30 minutes\u003cbr\u003e\n\t\tHOUR_1: 1 hour\u003cbr\u003e\n\t\tHOUR_2: 2 hours\u003cbr\u003e\n\t\tHOUR_4: 4 hours\u003cbr\u003e\n\t\tHOUR_6: 6 hours\u003cbr\u003e\n\t\tHOUR_8: 8 hours\u003cbr\u003e\n\t\tHOUR_12: 12 hours\u003cbr\u003e\n\t\tDAY_1: 1 day\u003cbr\u003e\n\t\tWEEK_1: 1 week\u003cbr\u003e\n\t\tMONTH_1: 1 month\u003cbr\u003e",
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "Trading Related"
+        ],
+        "summary": "getKline",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Exchange ID",
+            "name": "exchangeId",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "K-line type",
+            "name": "klineType",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Price type",
+            "name": "priceType",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "Number of records, default 100",
+            "name": "size",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Pagination offset, if empty, get first page",
+            "name": "offsetData",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "description": "Start time, if empty, get oldest data",
+            "name": "filterBeginKlineTimeInclusive",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "description": "End time, if empty, get latest data",
+            "name": "filterEndKlineTimeExclusive",
+            "in": "query",
+            "allowEmptyValue": true
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "klineList",
+                    "nextPageOffsetData"
+                  ],
+                  "properties": {
+                    "klineList": {
+                      "description": "K-line list",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "klineId",
+                          "exchangeId",
+                          "klineType",
+                          "priceType",
+                          "klineTime",
+                          "trades",
+                          "size",
+                          "value",
+                          "high",
+                          "low",
+                          "open",
+                          "close",
+                          "makerBuySize",
+                          "makerBuyValue"
+                        ],
+                        "properties": {
+                          "close": {
+                            "description": "Close price",
+                            "type": "string"
+                          },
+                          "exchangeId": {
+                            "description": "Exchange ID",
+                            "type": "string"
+                          },
+                          "high": {
+                            "description": "Highest price",
+                            "type": "string"
+                          },
+                          "klineId": {
+                            "description": "K-line ID",
+                            "type": "string"
+                          },
+                          "klineTime": {
+                            "description": "K-line time",
+                            "type": "integer"
+                          },
+                          "klineType": {
+                            "description": "K-line type",
+                            "type": "string"
+                          },
+                          "low": {
+                            "description": "Lowest price",
+                            "type": "string"
+                          },
+                          "makerBuySize": {
+                            "description": "Maker buy volume",
+                            "type": "string"
+                          },
+                          "makerBuyValue": {
+                            "description": "Maker buy turnover",
+                            "type": "string"
+                          },
+                          "open": {
+                            "description": "Open price",
+                            "type": "string"
+                          },
+                          "priceType": {
+                            "description": "K-line price type",
+                            "type": "string"
+                          },
+                          "size": {
+                            "description": "Volume",
+                            "type": "string"
+                          },
+                          "trades": {
+                            "description": "Number of trades",
+                            "type": "string"
+                          },
+                          "value": {
+                            "description": "Turnover",
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "nextPageOffsetData": {
+                      "description": "Next page offset, if no next page, empty string",
+                      "type": "string"
+                    }
+                  }
+                },
+                "msg": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "requestTime": {
+                  "type": "string"
+                },
+                "responseTime": {
+                  "type": "string"
+                },
+                "traceId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trade/getPerpetualAccountAsset": {
+      "get": {
+        "description": "Get perpetual contract account assets",
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "Perpetual Contract Related"
+        ],
+        "summary": "getPerpetualAccountAsset",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Subaccount ID",
+            "name": "subaccountId",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "subaccountId",
+                    "collateralList",
+                    "positionList",
+                    "lastHandledBlockHeight",
+                    "lastHandledBlockTime",
+                    "lastHandledTransactionIndex",
+                    "lastHandledEventIndex"
+                  ],
+                  "properties": {
+                    "collateralList": {
+                      "description": "Collateral list",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "subaccountId",
+                          "coinId",
+                          "amount",
+                          "legacyAmount",
+                          "cumDepositAmount",
+                          "cumWithdrawAmount",
+                          "cumTransferInAmount",
+                          "cumTransferOutAmount",
+                          "cumCrossPositionOpenLongAmount",
+                          "cumCrossPositionOpenShortAmount",
+                          "cumCrossPositionCloseLongAmount",
+                          "cumCrossPositionCloseShortAmount",
+                          "cumIsolatedPositionOpenAmount",
+                          "cumIsolatedPositionCloseAmount",
+                          "cumIsolatedPositionMarginUpdateAmount",
+                          "cumPositionFundingFeeAmount",
+                          "cumFillFeeAmount",
+                          "cumLiquidateFeeAmount",
+                          "cumFillFeeIncomeAmount",
+                          "cumLiquidateFeeIncomeAmount",
+                          "createdTime",
+                          "updatedTime"
+                        ],
+                        "properties": {
+                          "amount": {
+                            "description": "Collateral amount",
+                            "type": "string"
+                          },
+                          "coinId": {
+                            "description": "Collateral coin ID",
+                            "type": "string"
+                          },
+                          "createdTime": {
+                            "description": "Created time",
+                            "type": "integer"
+                          },
+                          "cumCrossPositionCloseLongAmount": {
+                            "description": "Cumulative cross position close long added collateral amount",
+                            "type": "string"
+                          },
+                          "cumCrossPositionCloseShortAmount": {
+                            "description": "Cumulative cross position close short deducted collateral amount",
+                            "type": "string"
+                          },
+                          "cumCrossPositionOpenLongAmount": {
+                            "description": "Cumulative cross position open long deducted collateral amount",
+                            "type": "string"
+                          },
+                          "cumCrossPositionOpenShortAmount": {
+                            "description": "Cumulative cross position open short added collateral amount",
+                            "type": "string"
+                          },
+                          "cumDepositAmount": {
+                            "description": "Cumulative deposit amount",
+                            "type": "string"
+                          },
+                          "cumFillFeeAmount": {
+                            "description": "Cumulative fill fee amount",
+                            "type": "string"
+                          },
+                          "cumFillFeeIncomeAmount": {
+                            "description": "Cumulative order fee income amount",
+                            "type": "string"
+                          },
+                          "cumIsolatedPositionCloseAmount": {
+                            "description": "Cumulative isolated position close added collateral amount",
+                            "type": "string"
+                          },
+                          "cumIsolatedPositionMarginUpdateAmount": {
+                            "description": "Cumulative isolated position margin update collateral amount",
+                            "type": "string"
+                          },
+                          "cumIsolatedPositionOpenAmount": {
+                            "description": "Cumulative isolated position open deducted collateral amount",
+                            "type": "string"
+                          },
+                          "cumLiquidateFeeAmount": {
+                            "description": "Cumulative liquidation fee amount",
+                            "type": "string"
+                          },
+                          "cumLiquidateFeeIncomeAmount": {
+                            "description": "Cumulative liquidation fee income amount",
+                            "type": "string"
+                          },
+                          "cumPositionFundingFeeAmount": {
+                            "description": "Cumulative position funding fee amount",
+                            "type": "string"
+                          },
+                          "cumTransferInAmount": {
+                            "description": "Cumulative transfer-in amount",
+                            "type": "string"
+                          },
+                          "cumTransferOutAmount": {
+                            "description": "Cumulative transfer-out amount",
+                            "type": "string"
+                          },
+                          "cumWithdrawAmount": {
+                            "description": "Cumulative withdrawal amount",
+                            "type": "string"
+                          },
+                          "legacyAmount": {
+                            "description": "Legacy accounting balance field, display only, not used in calculations",
+                            "type": "string"
+                          },
+                          "subaccountId": {
+                            "description": "Subaccount ID",
+                            "type": "string"
+                          },
+                          "updatedTime": {
+                            "description": "Updated time",
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    },
+                    "lastHandledBlockHeight": {
+                      "description": "Last handled block height",
+                      "type": "integer"
+                    },
+                    "lastHandledBlockTime": {
+                      "description": "Last handled block time",
+                      "type": "integer"
+                    },
+                    "lastHandledEventIndex": {
+                      "description": "Last handled event index",
+                      "type": "string"
+                    },
+                    "lastHandledTransactionIndex": {
+                      "description": "Last handled transaction index",
+                      "type": "string"
+                    },
+                    "positionList": {
+                      "description": "Position list",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "subaccountId",
+                          "coinId",
+                          "exchangeId",
+                          "marginMode",
+                          "openSize",
+                          "openValue",
+                          "openFee",
+                          "fundingFee",
+                          "isolatedMarginAmount",
+                          "isolatedCollateralAmount",
+                          "cacheFundingIndex",
+                          "latestFundingIndex",
+                          "termCount",
+                          "longTermStat",
+                          "shortTermStat",
+                          "longTotalStat",
+                          "shortTotalStat",
+                          "createdTime",
+                          "updatedTime"
+                        ],
+                        "properties": {
+                          "cacheFundingIndex": {
+                            "description": "Cached funding rate index, updated when asset is updated",
+                            "type": "string"
+                          },
+                          "coinId": {
+                            "description": "Collateral coin ID",
+                            "type": "string"
+                          },
+                          "createdTime": {
+                            "description": "Created time",
+                            "type": "integer"
+                          },
+                          "exchangeId": {
+                            "description": "Exchange ID, must be perpetual contract",
+                            "type": "string"
+                          },
+                          "fundingFee": {
+                            "description": "Current position funding fee after allocation (accumulates on settlement, proportionally decreases on close)",
+                            "type": "string"
+                          },
+                          "isolatedCollateralAmount": {
+                            "description": "Isolated collateral amount, meaningful when perpetual contract is in isolated mode",
+                            "type": "string"
+                          },
+                          "isolatedMarginAmount": {
+                            "description": "Isolated margin amount, meaningful when perpetual contract is in isolated mode",
+                            "type": "string"
+                          },
+                          "latestFundingIndex": {
+                            "description": "Latest updated funding rate index",
+                            "type": "string"
+                          },
+                          "longTermStat": {
+                            "description": "Long position term cumulative statistics, cleared after complete close",
+                            "type": "object",
+                            "required": [
+                              "cumOpenSize",
+                              "cumOpenValue",
+                              "cumOpenFee",
+                              "cumCloseSize",
+                              "cumCloseValue",
+                              "cumCloseFee",
+                              "cumFundingFee",
+                              "cumLiquidateFee",
+                              "createdTime",
+                              "updatedTime"
+                            ],
+                            "properties": {
+                              "createdTime": {
+                                "description": "Created time",
+                                "type": "integer"
+                              },
+                              "cumCloseFee": {
+                                "description": "Current close fee after allocation (accumulates on close, proportionally decreases on open)",
+                                "type": "string"
+                              },
+                              "cumCloseSize": {
+                                "description": "Current close size (positive for long, negative for short)",
+                                "type": "string"
+                              },
+                              "cumCloseValue": {
+                                "description": "Current close value (accumulates on close, proportionally decreases on open)",
+                                "type": "string"
+                              },
+                              "cumFundingFee": {
+                                "description": "Current position funding fee after allocation (accumulates on settlement, proportionally decreases on close)",
+                                "type": "string"
+                              },
+                              "cumLiquidateFee": {
+                                "description": "Current position liquidation fee after allocation (accumulates on settlement, proportionally decreases on close)",
+                                "type": "string"
+                              },
+                              "cumOpenFee": {
+                                "description": "Current open fee after allocation (accumulates on open, proportionally decreases on close)",
+                                "type": "string"
+                              },
+                              "cumOpenSize": {
+                                "description": "Current open size (positive for long, negative for short)",
+                                "type": "string"
+                              },
+                              "cumOpenValue": {
+                                "description": "Current open value (accumulates on open, proportionally decreases on close)",
+                                "type": "string"
+                              },
+                              "updatedTime": {
+                                "description": "Updated time",
+                                "type": "integer"
+                              }
+                            }
+                          },
+                          "longTotalStat": {
+                            "description": "Long position total cumulative statistics",
+                            "type": "object",
+                            "required": [
+                              "cumOpenSize",
+                              "cumOpenValue",
+                              "cumOpenFee",
+                              "cumCloseSize",
+                              "cumCloseValue",
+                              "cumCloseFee",
+                              "cumFundingFee",
+                              "cumLiquidateFee",
+                              "createdTime",
+                              "updatedTime"
+                            ],
+                            "properties": {
+                              "createdTime": {
+                                "description": "Created time",
+                                "type": "integer"
+                              },
+                              "cumCloseFee": {
+                                "description": "Current close fee after allocation (accumulates on close, proportionally decreases on open)",
+                                "type": "string"
+                              },
+                              "cumCloseSize": {
+                                "description": "Current close size (positive for long, negative for short)",
+                                "type": "string"
+                              },
+                              "cumCloseValue": {
+                                "description": "Current close value (accumulates on close, proportionally decreases on open)",
+                                "type": "string"
+                              },
+                              "cumFundingFee": {
+                                "description": "Current position funding fee after allocation (accumulates on settlement, proportionally decreases on close)",
+                                "type": "string"
+                              },
+                              "cumLiquidateFee": {
+                                "description": "Current position liquidation fee after allocation (accumulates on settlement, proportionally decreases on close)",
+                                "type": "string"
+                              },
+                              "cumOpenFee": {
+                                "description": "Current open fee after allocation (accumulates on open, proportionally decreases on close)",
+                                "type": "string"
+                              },
+                              "cumOpenSize": {
+                                "description": "Current open size (positive for long, negative for short)",
+                                "type": "string"
+                              },
+                              "cumOpenValue": {
+                                "description": "Current open value (accumulates on open, proportionally decreases on close)",
+                                "type": "string"
+                              },
+                              "updatedTime": {
+                                "description": "Updated time",
+                                "type": "integer"
+                              }
+                            }
+                          },
+                          "marginMode": {
+                            "description": "Margin mode",
+                            "type": "integer"
+                          },
+                          "openFee": {
+                            "description": "Current open fee after allocation (accumulates on open, proportionally decreases on close)",
+                            "type": "string"
+                          },
+                          "openSize": {
+                            "description": "Current open size (positive for long, negative for short)",
+                            "type": "string"
+                          },
+                          "openValue": {
+                            "description": "Current open value (accumulates on open, proportionally decreases on close)",
+                            "type": "string"
+                          },
+                          "shortTermStat": {
+                            "description": "Short position term cumulative statistics, cleared after complete close",
+                            "type": "object",
+                            "required": [
+                              "cumOpenSize",
+                              "cumOpenValue",
+                              "cumOpenFee",
+                              "cumCloseSize",
+                              "cumCloseValue",
+                              "cumCloseFee",
+                              "cumFundingFee",
+                              "cumLiquidateFee",
+                              "createdTime",
+                              "updatedTime"
+                            ],
+                            "properties": {
+                              "createdTime": {
+                                "description": "Created time",
+                                "type": "integer"
+                              },
+                              "cumCloseFee": {
+                                "description": "Current close fee after allocation (accumulates on close, proportionally decreases on open)",
+                                "type": "string"
+                              },
+                              "cumCloseSize": {
+                                "description": "Current close size (positive for long, negative for short)",
+                                "type": "string"
+                              },
+                              "cumCloseValue": {
+                                "description": "Current close value (accumulates on close, proportionally decreases on open)",
+                                "type": "string"
+                              },
+                              "cumFundingFee": {
+                                "description": "Current position funding fee after allocation (accumulates on settlement, proportionally decreases on close)",
+                                "type": "string"
+                              },
+                              "cumLiquidateFee": {
+                                "description": "Current position liquidation fee after allocation (accumulates on settlement, proportionally decreases on close)",
+                                "type": "string"
+                              },
+                              "cumOpenFee": {
+                                "description": "Current open fee after allocation (accumulates on open, proportionally decreases on close)",
+                                "type": "string"
+                              },
+                              "cumOpenSize": {
+                                "description": "Current open size (positive for long, negative for short)",
+                                "type": "string"
+                              },
+                              "cumOpenValue": {
+                                "description": "Current open value (accumulates on open, proportionally decreases on close)",
+                                "type": "string"
+                              },
+                              "updatedTime": {
+                                "description": "Updated time",
+                                "type": "integer"
+                              }
+                            }
+                          },
+                          "shortTotalStat": {
+                            "description": "Short position total cumulative statistics",
+                            "type": "object",
+                            "required": [
+                              "cumOpenSize",
+                              "cumOpenValue",
+                              "cumOpenFee",
+                              "cumCloseSize",
+                              "cumCloseValue",
+                              "cumCloseFee",
+                              "cumFundingFee",
+                              "cumLiquidateFee",
+                              "createdTime",
+                              "updatedTime"
+                            ],
+                            "properties": {
+                              "createdTime": {
+                                "description": "Created time",
+                                "type": "integer"
+                              },
+                              "cumCloseFee": {
+                                "description": "Current close fee after allocation (accumulates on close, proportionally decreases on open)",
+                                "type": "string"
+                              },
+                              "cumCloseSize": {
+                                "description": "Current close size (positive for long, negative for short)",
+                                "type": "string"
+                              },
+                              "cumCloseValue": {
+                                "description": "Current close value (accumulates on close, proportionally decreases on open)",
+                                "type": "string"
+                              },
+                              "cumFundingFee": {
+                                "description": "Current position funding fee after allocation (accumulates on settlement, proportionally decreases on close)",
+                                "type": "string"
+                              },
+                              "cumLiquidateFee": {
+                                "description": "Current position liquidation fee after allocation (accumulates on settlement, proportionally decreases on close)",
+                                "type": "string"
+                              },
+                              "cumOpenFee": {
+                                "description": "Current open fee after allocation (accumulates on open, proportionally decreases on close)",
+                                "type": "string"
+                              },
+                              "cumOpenSize": {
+                                "description": "Current open size (positive for long, negative for short)",
+                                "type": "string"
+                              },
+                              "cumOpenValue": {
+                                "description": "Current open value (accumulates on open, proportionally decreases on close)",
+                                "type": "string"
+                              },
+                              "updatedTime": {
+                                "description": "Updated time",
+                                "type": "integer"
+                              }
+                            }
+                          },
+                          "subaccountId": {
+                            "description": "Subaccount ID",
+                            "type": "string"
+                          },
+                          "termCount": {
+                            "description": "Long position term count, starts from 1, increments after complete close",
+                            "type": "integer"
+                          },
+                          "updatedTime": {
+                            "description": "Updated time",
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    },
+                    "subaccountId": {
+                      "description": "Subaccount ID",
+                      "type": "string"
+                    }
+                  }
+                },
+                "msg": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "requestTime": {
+                  "type": "string"
+                },
+                "responseTime": {
+                  "type": "string"
+                },
+                "traceId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trade/getPositionTransaction": {
+      "get": {
+        "description": "Get position transactions with pagination",
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "Perpetual Contract Related"
+        ],
+        "summary": "getPositionTransaction",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Subaccount ID",
+            "name": "subaccountId",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "Number of records",
+            "name": "size",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Pagination offset data, creation time",
+            "name": "pageOffsetDataCreatedTime",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Pagination offset data, itemId",
+            "name": "pageOffsetDataItemId",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Exchange IDs, multiple exchange IDs separated by commas",
+            "name": "filterExchangeIdList",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Transaction types, multiple transaction types separated by commas",
+            "name": "filterTypeList",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "Margin modes, multiple margin modes separated by commas",
+            "name": "filterMarginModeList",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "description": "Filter position transactions created at or after specified start time, if empty or 0 start from earliest",
+            "name": "filterStartCreatedTimeInclusive",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "description": "Filter position transactions created before specified end time, if empty or 0 get until latest",
+            "name": "filterEndCreatedTimeExclusive",
+            "in": "query",
+            "allowEmptyValue": true
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "positionTransactionList",
+                    "pageOffsetData"
+                  ],
+                  "properties": {
+                    "pageOffsetData": {
+                      "description": "Next page offset data",
+                      "type": "object",
+                      "required": [
+                        "createTime",
+                        "itemId"
+                      ],
+                      "properties": {
+                        "createTime": {
+                          "description": "next page offset data, creation time",
+                          "type": "string"
+                        },
+                        "itemId": {
+                          "description": "next page offset data, itemId",
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "positionTransactionList": {
+                      "description": "Position transaction list",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "subaccountId",
+                          "coinId",
+                          "exchangeId",
+                          "termCount",
+                          "marginMode",
+                          "type",
+                          "deltaOpenSize",
+                          "deltaOpenValue",
+                          "deltaOpenFee",
+                          "deltaFundingFee",
+                          "deltaIsolatedMarginAmount",
+                          "deltaIsolatedCollateralAmount",
+                          "beforeOpenSize",
+                          "beforeOpenValue",
+                          "beforeOpenFee",
+                          "beforeFundingFee",
+                          "beforeIsolatedMarginAmount",
+                          "beforeIsolatedCollateralAmount",
+                          "fillSize",
+                          "fillValue",
+                          "fillFee",
+                          "fillPrice",
+                          "liquidateFee",
+                          "realizePnl",
+                          "isPositionTp",
+                          "isPositionSl",
+                          "isLiquidate",
+                          "isDeleverage",
+                          "fundingTime",
+                          "fundingRate",
+                          "fundingMarkPrice",
+                          "fundingOraclePrice",
+                          "fundingPositionSize",
+                          "orderId",
+                          "orderFillTransactionId",
+                          "collateralTransactionId",
+                          "blockHeight",
+                          "blockTime",
+                          "transactionIndex",
+                          "eventIndex",
+                          "createdTime",
+                          "updatedTime"
+                        ],
+                        "properties": {
+                          "beforeFundingFee": {
+                            "description": "Funding fee before change",
+                            "type": "string"
+                          },
+                          "beforeIsolatedCollateralAmount": {
+                            "description": "Isolated collateral amount before change",
+                            "type": "string"
+                          },
+                          "beforeIsolatedMarginAmount": {
+                            "description": "Isolated margin amount before change",
+                            "type": "string"
+                          },
+                          "beforeOpenFee": {
+                            "description": "Open fee before change",
+                            "type": "string"
+                          },
+                          "beforeOpenSize": {
+                            "description": "Position size before change",
+                            "type": "string"
+                          },
+                          "beforeOpenValue": {
+                            "description": "Open value before change",
+                            "type": "string"
+                          },
+                          "blockHeight": {
+                            "description": "Block height",
+                            "type": "integer"
+                          },
+                          "blockTime": {
+                            "description": "Block time",
+                            "type": "integer"
+                          },
+                          "coinId": {
+                            "description": "Coin ID",
+                            "type": "string"
+                          },
+                          "collateralTransactionId": {
+                            "description": "Associated collateral transaction ID",
+                            "type": "string"
+                          },
+                          "createdTime": {
+                            "description": "Created time",
+                            "type": "integer"
+                          },
+                          "deltaFundingFee": {
+                            "description": "Funding fee change",
+                            "type": "string"
+                          },
+                          "deltaIsolatedCollateralAmount": {
+                            "description": "Isolated collateral amount change",
+                            "type": "string"
+                          },
+                          "deltaIsolatedMarginAmount": {
+                            "description": "Isolated margin amount change",
+                            "type": "string"
+                          },
+                          "deltaOpenFee": {
+                            "description": "Open fee change",
+                            "type": "string"
+                          },
+                          "deltaOpenSize": {
+                            "description": "Position size change",
+                            "type": "string"
+                          },
+                          "deltaOpenValue": {
+                            "description": "Open value change",
+                            "type": "string"
+                          },
+                          "eventIndex": {
+                            "description": "Event index",
+                            "type": "string"
+                          },
+                          "exchangeId": {
+                            "description": "Contract ID",
+                            "type": "string"
+                          },
+                          "fillFee": {
+                            "description": "Fill fee (usually zero or negative)",
+                            "type": "string"
+                          },
+                          "fillPrice": {
+                            "description": "Fill price (not precise, for display only)",
+                            "type": "string"
+                          },
+                          "fillSize": {
+                            "description": "Fill size (positive for buy, negative for sell)",
+                            "type": "string"
+                          },
+                          "fillValue": {
+                            "description": "Fill value (positive for buy, negative for sell)",
+                            "type": "string"
+                          },
+                          "fundingMarkPrice": {
+                            "description": "Funding rate related index price",
+                            "type": "string"
+                          },
+                          "fundingOraclePrice": {
+                            "description": "Funding rate related oracle price",
+                            "type": "string"
+                          },
+                          "fundingPositionSize": {
+                            "description": "Position size at funding fee settlement (positive for long, negative for short)",
+                            "type": "string"
+                          },
+                          "fundingRate": {
+                            "description": "Funding rate",
+                            "type": "string"
+                          },
+                          "fundingTime": {
+                            "description": "Funding rate settlement time",
+                            "type": "integer"
+                          },
+                          "id": {
+                            "description": "Unique identifier",
+                            "type": "string"
+                          },
+                          "isDeleverage": {
+                            "description": "Whether it is an auto-deleverage order",
+                            "type": "boolean"
+                          },
+                          "isLiquidate": {
+                            "description": "Whether it is a liquidation order",
+                            "type": "boolean"
+                          },
+                          "isPositionSl": {
+                            "description": "Whether it is a position take-profit/stop-loss order",
+                            "type": "boolean"
+                          },
+                          "isPositionTp": {
+                            "description": "Whether it is a position take-profit/stop-loss order",
+                            "type": "boolean"
+                          },
+                          "liquidateFee": {
+                            "description": "Liquidation fee (exists when there is close fill, usually zero or negative)",
+                            "type": "string"
+                          },
+                          "marginMode": {
+                            "description": "Margin mode",
+                            "type": "integer"
+                          },
+                          "orderFillTransactionId": {
+                            "description": "Associated order fill transaction ID",
+                            "type": "string"
+                          },
+                          "orderId": {
+                            "description": "Associated order ID",
+                            "type": "string"
+                          },
+                          "realizePnl": {
+                            "description": "Realized PnL (exists when there is close fill, not precise, for display only)",
+                            "type": "string"
+                          },
+                          "subaccountId": {
+                            "description": "Subaccount ID",
+                            "type": "string"
+                          },
+                          "termCount": {
+                            "description": "Position term count",
+                            "type": "integer"
+                          },
+                          "transactionIndex": {
+                            "description": "Transaction index",
+                            "type": "string"
+                          },
+                          "type": {
+                            "description": "Transaction type",
+                            "type": "integer"
+                          },
+                          "updatedTime": {
+                            "description": "Updated time",
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "msg": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "requestTime": {
+                  "type": "string"
+                },
+                "responseTime": {
+                  "type": "string"
+                },
+                "traceId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trade/sendSyncTransaction": {
+      "post": {
+        "description": "Send sync transaction",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "Trading Related"
+        ],
+        "summary": "sendSyncTransaction",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "typeUrl",
+                "rawTx"
+              ],
+              "properties": {
+                "accountNumber": {
+                  "description": "Account number",
+                  "type": "integer"
+                },
+                "rawTx": {
+                  "description": "Transaction raw tx",
+                  "type": "string"
+                },
+                "typeUrl": {
+                  "description": "Transaction type",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "rawTx",
+                    "block",
+                    "hash",
+                    "from",
+                    "status",
+                    "error",
+                    "action",
+                    "resultData"
+                  ],
+                  "properties": {
+                    "action": {
+                      "description": "Actions",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "typeUrl",
+                          "detail"
+                        ],
+                        "properties": {
+                          "detail": {
+                            "description": "Details"
+                          },
+                          "typeUrl": {
+                            "description": "Type",
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "block": {
+                      "description": "Block height",
+                      "type": "integer"
+                    },
+                    "error": {
+                      "description": "Error"
+                    },
+                    "from": {
+                      "description": "Sender",
+                      "type": "string"
+                    },
+                    "hash": {
+                      "description": "Transaction hash",
+                      "type": "string"
+                    },
+                    "rawTx": {
+                      "description": "Raw data",
+                      "type": "string"
+                    },
+                    "resultData": {
+                      "description": "Data",
+                      "type": "string"
+                    },
+                    "status": {
+                      "description": "Status",
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "msg": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "requestTime": {
+                  "type": "string"
+                },
+                "responseTime": {
+                  "type": "string"
+                },
+                "traceId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trade/sendTransaction": {
+      "post": {
+        "description": "Send transaction",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "Trading Related"
+        ],
+        "summary": "sendTransaction",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "typeUrl",
+                "rawTx"
+              ],
+              "properties": {
+                "accountNumber": {
+                  "description": "Account number",
+                  "type": "integer"
+                },
+                "rawTx": {
+                  "description": "Transaction raw tx",
+                  "type": "string"
+                },
+                "typeUrl": {
+                  "description": "Transaction type",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "txHash",
+                    "rawTx",
+                    "resultData"
+                  ],
+                  "properties": {
+                    "rawTx": {
+                      "description": "Transaction raw tx",
+                      "type": "string"
+                    },
+                    "resultData": {
+                      "description": "Data",
+                      "type": "string"
+                    },
+                    "txHash": {
+                      "description": "Transaction hash",
+                      "type": "string"
+                    }
+                  }
+                },
+                "msg": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "requestTime": {
+                  "type": "string"
+                },
+                "responseTime": {
+                  "type": "string"
+                },
+                "traceId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ws": {
+      "get": {
+        "description": "Establish WebSocket connection\u003cbr\u003e\n\t\tMeanings of the following enum values:\u003cbr\u003e\n\t\ttransferReason: 0: Unknown 1: User manually initiated transfer 2: Transfer caused by user deposit 3: Transfer caused by user withdrawal\u003cbr\u003e\n\t\tmarginMode: 0: Unknown 1: Cross margin mode 2: Isolated margin mode\u003cbr\u003e\n\t\ttimeInForce: 0: Unknown 1: GOOD_TIL_CANCEL 2: FILL_OR_KILL 3: IMMEDIATE_OR_CANCEL 4: POST_ONLY\u003cbr\u003e\n\t\ttriggerType: 0: Unknown 1: Stop-loss conditional order. If is_buy=false, then current price \u003c= triggerPrice triggers; if is_buy=true, then current price \u003e= triggerPrice triggers 2: Take-profit conditional order. If is_buy=false, then current price \u003e= triggerPrice triggers; if is_buy=true, then current price \u003c= triggerPrice triggers\u003cbr\u003e\n\t\tpriceType: 0: Unknown 1: Last traded price 2: Best ask price 3: Best bid price 4: Oracle price 5: Index price\u003cbr\u003e\n\t\torderCancelReason: 0: Unknown 1: Order fully filled, automatically cancelled. Essentially also a cancellation reason 2: User actively cancelled 3: Expired cancellation 4: Market order/FOK/IOC/PostOnly order, cancelled due to insufficient fill quantity 5: Cancelled due to not meeting reduceOnly condition 6: Insufficient margin cancellation 7: Cancelled due to liquidation trigger 8: Admin cancellation\u003cbr\u003e\n\t\tGeneral format: {method: 'subscribe/unsubscribe', subscription: {channel: 'xxx'}}\u003cbr\u003e\n\t\tSubscription response: {channel: 'subscriptionResponse', data: {method: 'subscribe/unsubscribe', subscription: {channel: 'xxx'}}}\u003cbr\u003e\n\t\tSubscribe to tradeData: {method: 'subscribe', subscription: { channel: 'tradeData', chainType: 1, chainAddress: 'ethAddress' } }\u003cbr\u003e\n\t\tUnsubscribe from tradeData: {method: 'unsubscribe', subscription: { channel: 'tradeData', chainType: 1, chainAddress: 'ethAddress' } }\u003cbr\u003e\n\t\ttradeData return data: {'channel': 'tradeData', 'user': 'ethAddress', 'data':{'eventType': 0, 'isSnapshot': true, 'version': '0', 'subaccountList': [{}], 'agentBindingList': [{}] , 'orderList': [{}] , 'collateralList': [{}] , 'positionList': [{}] , 'orderFillTransactionList': [{}] , 'agentBindingCreateList': [{}] , 'agentBindingRemoveList': [{}] }\u003cbr\u003e\n\t\teventType: 0: Unspecified 1: Agent binding creation event 2: Agent binding removal event 3: Subaccount update event 4: Order update event 5: Position collateral change event 6: Transfer-in update event 7: Transfer-out update event\u003cbr\u003e\n\t\tFor details, refer to antx-proto/proto/antx/server/indexer/indexer_event.proto\u003cbr\u003e\n\t\tSubscribe to kline: {'method':'subscribe', 'subscription':{'channel':'kline.PRICE_TYPE_LAST.200001.MINUTE_1/kline.priceType.exchangeId.klineType'}}\u003cbr\u003e\n\t\tUnsubscribe from kline: {method: 'unsubscribe', subscription: { channel: 'kline.PRICE_TYPE_LAST.200001.MINUTE_1' } }\u003cbr\u003e\n\t\tkline return data: {'channel':'kline','event':'payload','data':[{'klineId':'13743968457917283','exchangeId':'200001','klineType':'MINUTE_1','priceType':'PRICE_TYPE_LAST','klineTime':1749863220000,'trades':'0','size':'0','value':'0','high':'100000.0','low':'100000.0','open':'100000.0','close':'100000.0','makerBuySize':'0','makerBuyValue':'0'}]}\u003cbr\u003e\n\t\tSubscribe to ticker: {method: 'subscribe', subscription: { channel: 'ticker.all/ticker.200001/ticker.exchangeId' } }\u003cbr\u003e\n\t\tUnsubscribe from ticker: {method: 'unsubscribe', subscription: { channel: 'ticker.all/ticker.200001' } }\u003cbr\u003e\n\t\tticker return data: {'channel':'ticker','event':'payload','data':[{'exchangeId':'200001','priceChange':'0.00000000','priceChangePercent':'0.00000000','trades':'0','size':'0','value':'0','high':'100000.0','low':'100000.0','open':'100000.0','close':'100000.0','highTime':'1749863220000','lowTime':'1749863220000','startTime':'1749863220000','endTime':'1749863220000','lastPrice':'100000.0','markPrice':'100000.0','indexPrice':'100000.0','openInterest':'0'}]}\u003cbr\u003e\n\t\tSubscribe to depth: {method: 'subscribe', subscription: { channel: 'depth.200001.200/depth.exchangeId.Level' } }\u003cbr\u003e\n\t\tUnsubscribe from depth: {method: 'unsubscribe', subscription: { channel: 'depth.200001.200' } }\u003cbr\u003e\n\t\tdepth return data: {'channel':'depth','event':'payload','data':[{'isSnapshot': true, 'startVersion':'1','endVersion':'1','level':'200','exchangeId':'200001','asks':[{'price':'100000.0','size':'100000.0'}],'bids':[{'price':'100000.0','size':'100000.0'}]}]}\u003cbr\u003e\n\t\tSubscribe to trade: {method: 'subscribe', subscription: { channel: 'trade.200001/trade.exchangeId' } }\u003cbr\u003e\n\t\tUnsubscribe from trade: {method: 'unsubscribe', subscription: { channel: 'trade.200001' } }\u003cbr\u003e\n\t\ttrade return data: {'channel':'trade','event':'payload','data':[{'ticketId':'13743968457917283','exchangeId':'200001','time':'1749863220000','price':'100000.0','size':'100000.0','value':'100000000.0','takerOrderId':'13743968457917283','makerOrderId':'13743968457917283','takerAccountId':'1','makerAccountId':'1', 'isBestMatch':'true', 'isBuyerMaker':'true'}]}\u003cbr\u003e\n\t\tTransaction result push: {'channel':'txResult', 'user':'antxxxx', 'data':{'rawTx':'', 'block':123, 'hash':'0xxxx', 'from':'antxxxx', 'status':'false', 'action':[{'typeUrl':'', 'detail':{}}]}}\u003cbr\u003e\n\t\tSubscribe to funding rate: {method: 'subscribe', subscription: { channel: 'fundingRate.200001/fundingRate.exchangeId' } }\u003cbr\u003e\n\t\tUnsubscribe from funding rate: {method: 'unsubscribe', subscription: { channel: 'fundingRate.200001' } }\u003cbr\u003e\n\t\tfunding rate push: {'channel':'fundingRate','event':'payload','data':[{'exchangeId':'200001','fundingTime':'1749863220000','fundingCalculateTime':'1749863220000','fundingRate':'0.00000000','oraclePrice':'100000.0','markPrice':'100000.0','isSettlement':'false','forecastFundingRate':'0.00000000','previousFundingRate':'0.00000000','previousFundingCalculateTime':'1749863220000','premiumIndex':'0.00000000','avgPremiumIndex':'0.00000000','premiumIndexCalculateTime':'1749863220000','impactMarginNotional':'0.00000000','impactAskPrice':'100000.0','impactBidPrice':'100000.0','interestRate':'0.00000000','predictedFundingRate':'0.00000000','fundingRateIntervalMinutes':'0'}]}\u003cbr\u003e\n\t\tSubscribe to price: {method: 'subscribe', subscription: { channel: 'price.200001/price.exchangeId' } }\u003cbr\u003e\n\t\tUnsubscribe from price: {method: 'unsubscribe', subscription: { channel: 'price.200001' } }\u003cbr\u003e\n\t\tprice push: {'channel':'price','event':'payload','data':[{'exchangeId':'200001','priceType':'PRICE_TYPE_LAST','price':'100000.0','priceTime':'1749863220000','createdTime':'1749863220000'}]}\u003cbr\u003e\n\t\t",
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "WebSocket Related"
+        ],
+        "summary": "serveWs",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {}
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "description": "Health check",
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "Base Services"
+        ],
+        "summary": "health",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "msg": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "requestTime": {
+                  "type": "string"
+                },
+                "responseTime": {
+                  "type": "string"
+                },
+                "traceId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "x-date": "2025-11-15 20:35:11",
+  "x-description": "This is a goctl generated swagger file.",
+  "x-github": "https://github.com/zeromicro/go-zero",
+  "x-go-zero-doc": "https://go-zero.dev/",
+  "x-goctl-version": "1.8.3"
+}
