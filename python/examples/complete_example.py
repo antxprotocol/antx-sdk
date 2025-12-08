@@ -13,8 +13,14 @@ This example matches the Go SDK's complete_example.go functionality.
 """
 
 import os
+import sys
 import time
 from typing import Optional
+
+# Add parent directory to path to import antex_sdk
+script_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(script_dir)
+sys.path.insert(0, parent_dir)
 
 from antex_sdk.client import AntexClient
 from antex_sdk.constants import (

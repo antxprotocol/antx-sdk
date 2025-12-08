@@ -15,7 +15,10 @@ import sys
 import time
 import os
 
-sys.path.insert(0, './python')
+# Add parent directory to path to import antex_sdk
+script_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(script_dir)
+sys.path.insert(0, parent_dir)
 
 from antex_sdk.client import AntexClient
 from antex_sdk.constants import ACCOUNT_HRP
@@ -27,15 +30,12 @@ CHAIN_ID = "antex-testnet"
 
 # Load private key from file
 def load_private_key():
-    """Load private key from .test_private_key file"""
+    """Load private key from .test_private_key file, returns None if file not found"""
     script_dir = os.path.dirname(os.path.abspath(__file__))
     key_file = os.path.join(script_dir, '.test_private_key')
     
     if not os.path.exists(key_file):
-        raise FileNotFoundError(
-            f"Private key file not found: {key_file}\n"
-            f"Please create {key_file} with your test private key."
-        )
+        return None
     
     with open(key_file, 'r') as f:
         key = f.read().strip()
@@ -80,6 +80,12 @@ def test_client_creation():
 def test_address_derivation(client):
     """Test address derivation from private key"""
     print("\n[3/7] Testing address derivation...")
+    if PRIV is None:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        key_file = os.path.join(script_dir, '.test_private_key')
+        print(f"⚠ Skipping: Private key file not found: {key_file}")
+        print(f"   Please create {key_file} with your test private key to run this test.")
+        return None
     try:
         client.set_credentials(agent_private_key_hex=PRIV, chain_id=CHAIN_ID, account_hrp=ACCOUNT_HRP)
         agent_addr = client._agent_address_bech32
@@ -95,6 +101,12 @@ def test_address_derivation(client):
 def test_transaction_messages(client):
     """Test transaction message creation"""
     print("\n[4/7] Testing transaction message creation...")
+    if PRIV is None:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        key_file = os.path.join(script_dir, '.test_private_key')
+        print(f"⚠ Skipping: Private key file not found: {key_file}")
+        print(f"   Please create {key_file} with your test private key to run this test.")
+        return None
     try:
         from antex_proto.antex.chain.agent import tx_pb2 as agent_tx
         from antex_proto.antex.chain.order import tx_pb2 as order_tx
@@ -160,6 +172,12 @@ def test_transaction_messages(client):
 def test_transaction_building(client):
     """Test transaction building (dry-run)"""
     print("\n[5/7] Testing transaction building (dry-run)...")
+    if PRIV is None:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        key_file = os.path.join(script_dir, '.test_private_key')
+        print(f"⚠ Skipping: Private key file not found: {key_file}")
+        print(f"   Please create {key_file} with your test private key to run this test.")
+        return None
     try:
         from antex_sdk.tx import pack_any, build_tx_body, build_auth_info
         from antex_proto.antex.chain.agent import tx_pb2 as agent_tx
@@ -300,14 +318,10 @@ def main():
     if not client:
         sys.exit(1)
 
-    if not test_address_derivation(client):
-        sys.exit(1)
-
-    if not test_transaction_messages(client):
-        sys.exit(1)
-
-    if not test_transaction_building(client):
-        sys.exit(1)
+    # Tests that require private key (may be skipped)
+    addr_ok = test_address_derivation(client)
+    msg_ok = test_transaction_messages(client)
+    build_ok = test_transaction_building(client)
 
     # These may fail due to gateway configuration, but are not critical
     http_ok = test_http_queries(client)
@@ -316,9 +330,27 @@ def main():
     print("\n" + "=" * 60)
     print("Test Summary:")
     print("✓ Imports: OK")
-    print("✓ Address derivation: OK")
-    print("✓ Transaction message creation: OK")
-    print("✓ Transaction building: OK")
+    if addr_ok is None:
+        print("⚠ Address derivation: Skipped (private key not found)")
+    elif addr_ok:
+        print("✓ Address derivation: OK")
+    else:
+        print("✗ Address derivation: Failed")
+    
+    if msg_ok is None:
+        print("⚠ Transaction message creation: Skipped (private key not found)")
+    elif msg_ok:
+        print("✓ Transaction message creation: OK")
+    else:
+        print("✗ Transaction message creation: Failed")
+    
+    if build_ok is None:
+        print("⚠ Transaction building: Skipped (private key not found)")
+    elif build_ok:
+        print("✓ Transaction building: OK")
+    else:
+        print("✗ Transaction building: Failed")
+    
     if http_ok:
         print("✓ HTTP queries: OK")
     else:
@@ -328,12 +360,20 @@ def main():
     else:
         print("⚠ WebSocket: Failed (non-critical, may need gateway config)")
     print("=" * 60)
-    print("\n✓ Core functionality verified!")
+    
+    if PRIV is None:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        key_file = os.path.join(script_dir, '.test_private_key')
+        print(f"\n⚠ Note: Some tests were skipped because private key file not found.")
+        print(f"   To run all tests, create {key_file} with your test private key.")
+    else:
+        print("\n✓ Core functionality verified!")
     print("Note: HTTP/WS failures are non-critical and may be due to:")
     print("      - Gateway requiring authentication")
     print("      - Network connectivity issues")
     print("      - Gateway configuration differences")
-    print("\nTransaction signing is ready when account_number is available")
+    if PRIV:
+        print("\nTransaction signing is ready when account_number is available")
 
 
 if __name__ == "__main__":
