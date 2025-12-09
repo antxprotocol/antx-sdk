@@ -25,7 +25,6 @@ dependencies = [
   "bech32>=1.2.0",
   "ecdsa>=0.18.0",
   "pycryptodome>=3.19.0",
-  "cosmos-proto>=0.3.0",
   "coincurve>=18.0.0",
 ]
 
