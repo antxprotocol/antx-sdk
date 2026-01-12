@@ -1,0 +1,84 @@
+BASE_API_PATH = "/api/v1"
+
+# Address
+GET_ADDRESS_INFO_PATH = f"{BASE_API_PATH}/address/getAddressInfo"
+
+# Subaccount
+GET_SUBACCOUNT_PATH = f"{BASE_API_PATH}/subaccount/getSubaccount"
+
+# Trade (HTTP)
+GET_COIN_LIST_PATH = f"{BASE_API_PATH}/trade/getCoinList"
+GET_EXCHANGE_LIST_PATH = f"{BASE_API_PATH}/trade/getExchangeList"
+SEND_TRANSACTION_PATH = f"{BASE_API_PATH}/trade/sendTransaction"
+SEND_SYNC_TRANSACTION_PATH = f"{BASE_API_PATH}/trade/sendSyncTransaction"
+
+# Market data
+GET_KLINE_PATH = f"{BASE_API_PATH}/trade/getKline"
+GET_TICKER_PATH = f"{BASE_API_PATH}/trade/getTicker"
+GET_DEPTH_PATH = f"{BASE_API_PATH}/trade/getDepth"
+GET_TRADE_PATH = f"{BASE_API_PATH}/trade/getTrade"
+GET_FUNDING_HISTORY_PATH = f"{BASE_API_PATH}/trade/getFundingHistory"
+GET_PRICE_PATH = f"{BASE_API_PATH}/trade/getPrice"
+
+# Trading queries
+GET_ACTIVE_ORDER_PATH = f"{BASE_API_PATH}/trade/getActiveOrder"
+GET_HISTORY_ORDER_PATH = f"{BASE_API_PATH}/trade/getHistoryOrder"
+GET_PERPETUAL_ACCOUNT_ASSET_PATH = f"{BASE_API_PATH}/trade/getPerpetualAccountAsset"
+GET_POSITION_TRANSACTION_PATH = f"{BASE_API_PATH}/trade/getPositionTransaction"
+GET_COLLATERAL_TRANSACTION_PATH = f"{BASE_API_PATH}/trade/getCollateralTransaction"
+GET_ASSET_SNAPSHOT_PATH = f"{BASE_API_PATH}/trade/getAssetSnapshot"
+GET_HISTORY_ORDER_FILL_TRANSACTION_PATH = f"{BASE_API_PATH}/trade/getHistoryOrderFillTransaction"
+GET_HISTORY_POSITION_TERM_PATH = f"{BASE_API_PATH}/trade/getHistoryPositionTerm"
+
+# Explorer
+GET_TRANSACTION_PATH = f"{BASE_API_PATH}/explorer/tx"
+
+# WebSocket
+WEBSOCKET_PATH = "/api/v1/ws"
+
+# Kline types
+KLINE_TYPE_MINUTE_1 = "MINUTE_1"
+KLINE_TYPE_MINUTE_5 = "MINUTE_5"
+KLINE_TYPE_MINUTE_15 = "MINUTE_15"
+KLINE_TYPE_MINUTE_30 = "MINUTE_30"
+KLINE_TYPE_HOUR_1 = "HOUR_1"
+KLINE_TYPE_HOUR_2 = "HOUR_2"
+KLINE_TYPE_HOUR_4 = "HOUR_4"
+KLINE_TYPE_HOUR_6 = "HOUR_6"
+KLINE_TYPE_HOUR_8 = "HOUR_8"
+KLINE_TYPE_HOUR_12 = "HOUR_12"
+KLINE_TYPE_DAY_1 = "DAY_1"
+KLINE_TYPE_WEEK_1 = "WEEK_1"
+KLINE_TYPE_MONTH_1 = "MONTH_1"
+
+# Price types
+PRICE_TYPE_LAST = "PRICE_TYPE_LAST"
+PRICE_TYPE_ASK_BEST = "PRICE_TYPE_ASK_BEST"
+PRICE_TYPE_BID_BEST = "PRICE_TYPE_BID_BEST"
+PRICE_TYPE_MARK = "PRICE_TYPE_MARK"
+PRICE_TYPE_ORACLE = "PRICE_TYPE_ORACLE"
+
+# Order status
+ORDER_STATUS_UNKNOWN = 0
+ORDER_STATUS_PENDING = 1
+ORDER_STATUS_FILLED = 2
+ORDER_STATUS_CANCELLED = 3
+ORDER_STATUS_EXPIRED = 4
+ORDER_STATUS_REJECTED = 5
+ORDER_STATUS_PARTIALLY_FILLED = 6
+ORDER_STATUS_LIQUIDATED = 7
+ORDER_STATUS_DELEVERAGED = 8
+
+# Msg type urls
+MSG_CREATE_ORDER_TYPE_URL = "/antx.chain.order.MsgCreateOrder"
+MSG_CREATE_ORDER_BATCH_TYPE_URL = "/antx.chain.order.MsgCreateOrderBatch"
+MSG_CANCEL_ORDER_TYPE_URL = "/antx.chain.order.MsgCancelOrder"
+MSG_CANCEL_ORDER_BY_CLIENT_ID_TYPE_URL = "/antx.chain.order.MsgCancelOrderByClientId"
+MSG_CANCEL_ALL_ORDER_TYPE_URL = "/antx.chain.order.MsgCancelAllOrder"
+MSG_CLOSE_ALL_POSITION_TYPE_URL = "/antx.chain.order.MsgCloseAllPosition"
+
+MSG_BIND_AGENT_TYPE_URL = "/antx.chain.agent.MsgBindAgent"
+
+# Account HRP
+ACCOUNT_HRP = "antx"
+

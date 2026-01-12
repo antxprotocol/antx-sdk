@@ -1,4 +1,4 @@
-# Antex SDK Python Tests
+# Antx SDK Python Tests
 
 ## Running Tests
 
@@ -28,9 +28,9 @@ This test verifies:
 ## Test Configuration
 
 The test uses the following default configuration:
-- Gateway: `https://testnet.antex.ai`
-- WebSocket: `wss://testnet.antex.ai/api/v1/ws`
-- Chain ID: `antex-testnet`
+- Gateway: `https://testnet.antxfi.com`
+- WebSocket: `wss://testnet.antxfi.com/api/v1/ws`
+- Chain ID: `antx-testnet`
 - Test private key: Loaded from `tests/.test_private_key` file
 
 ### Setting Up Private Key

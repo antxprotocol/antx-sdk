@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Complete example for Antex SDK Python
+Complete example for Antx SDK Python
 
 This example demonstrates:
 1. Basic functions (coin list, exchange list)
@@ -17,13 +17,13 @@ import sys
 import time
 from typing import Optional
 
-# Add parent directory to path to import antex_sdk
+# Add parent directory to path to import antx_sdk
 script_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(script_dir)
 sys.path.insert(0, parent_dir)
 
-from antex_sdk.client import AntexClient
-from antex_sdk.constants import (
+from antx_sdk.client import AntxClient
+from antx_sdk.constants import (
     ACCOUNT_HRP,
     KLINE_TYPE_MINUTE_1,
     PRICE_TYPE_LAST,
@@ -31,9 +31,9 @@ from antex_sdk.constants import (
 
 
 # Configuration
-GATEWAY_URL = os.environ.get("ANTEX_GATEWAY", "https://testnet.antex.ai")
-WS_URL = os.environ.get("ANTEX_WS", "wss://testnet.antex.ai/api/v1/ws")
-CHAIN_ID = os.environ.get("ANTEX_CHAIN_ID", "antex-testnet")
+GATEWAY_URL = os.environ.get("ANTX_GATEWAY", "https://testnet.antxfi.com")
+WS_URL = os.environ.get("ANTX_WS", "wss://testnet.antxfi.com/api/v1/ws")
+CHAIN_ID = os.environ.get("ANTX_CHAIN_ID", "antx-testnet")
 
 # Credentials (set via environment variables or replace with your keys)
 ETH_PRIVATE_KEY = os.environ.get("ETH_PRIVATE_KEY", "")
@@ -43,7 +43,7 @@ AGENT_PRIVATE_KEY = os.environ.get("AGENT_PRIVATE_KEY", "")
 DEFAULT_EXCHANGE_ID = "200001"
 
 
-def demo_basic_functions(client: AntexClient):
+def demo_basic_functions(client: AntxClient):
     """Demo basic functions: coin list, exchange list"""
     print("\n=== 1. Basic Functions Demo ===")
 
@@ -68,7 +68,7 @@ def demo_basic_functions(client: AntexClient):
         print(f"⚠ Failed to get exchange list: {e}")
 
 
-def demo_market_data(client: AntexClient):
+def demo_market_data(client: AntxClient):
     """Demo market data: kline, funding history"""
     print("\n=== 2. Market Data Demo ===")
 
@@ -110,7 +110,7 @@ def demo_market_data(client: AntexClient):
         print(f"⚠ Failed to get funding history: {e}")
 
 
-def demo_websocket_realtime(client: AntexClient):
+def demo_websocket_realtime(client: AntxClient):
     """Demo WebSocket real-time market data"""
     print("\n=== 3. WebSocket Real-time Data Demo ===")
 
@@ -158,7 +158,7 @@ def demo_websocket_realtime(client: AntexClient):
         print(f"⚠ WebSocket demo failed: {e}")
 
 
-def demo_trading_functions(client: AntexClient):
+def demo_trading_functions(client: AntxClient):
     """Demo trading functions: bind agent, create/cancel orders"""
     print("\n=== 4. Trading Functions Demo ===")
     print("Note: Trading functions require valid credentials and agent binding")
@@ -187,7 +187,7 @@ def demo_trading_functions(client: AntexClient):
         print("\n4.2 Getting subaccount list...")
         try:
             from eth_account import Account
-            from antex_sdk.crypto import convert_to_eth_addr
+            from antx_sdk.crypto import convert_to_eth_addr
             eth_addr = Account.from_key(bytes.fromhex(ETH_PRIVATE_KEY.replace("0x", ""))).address
             eth_addr_checksum = convert_to_eth_addr(eth_addr)
             sub_list = client.get_subaccount_list(chain_type=1, chain_address=eth_addr_checksum, agent_address=agent_addr)
@@ -341,7 +341,7 @@ def demo_trading_functions(client: AntexClient):
         traceback.print_exc()
 
 
-def demo_trading_queries(client: AntexClient):
+def demo_trading_queries(client: AntxClient):
     """Demo trading queries: active orders, account assets, etc."""
     print("\n=== 5. Trading Queries Demo ===")
 
@@ -356,7 +356,7 @@ def demo_trading_queries(client: AntexClient):
         # Get subaccount
         try:
             from eth_account import Account
-            from antex_sdk.crypto import convert_to_eth_addr
+            from antx_sdk.crypto import convert_to_eth_addr
             # Use ETH_PRIVATE_KEY to get ETH address (same as demo_trading_functions)
             eth_addr = Account.from_key(bytes.fromhex(ETH_PRIVATE_KEY.replace("0x", ""))).address
             eth_addr_checksum = convert_to_eth_addr(eth_addr)
@@ -539,12 +539,12 @@ def demo_trading_queries(client: AntexClient):
 def main():
     """Run all demos"""
     print("=" * 60)
-    print("Antex SDK Python - Complete Example")
+    print("Antx SDK Python - Complete Example")
     print("=" * 60)
     print(f"Gateway: {GATEWAY_URL}")
     print(f"Chain ID: {CHAIN_ID}")
 
-    client = AntexClient(base_url=GATEWAY_URL, ws_url=WS_URL)
+    client = AntxClient(base_url=GATEWAY_URL, ws_url=WS_URL)
 
     # Run demos
     demo_basic_functions(client)

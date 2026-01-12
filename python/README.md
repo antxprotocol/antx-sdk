@@ -1,6 +1,6 @@
-# Antex SDK for Python
+# Antx SDK for Python
 
-This package provides HTTP, WebSocket, and on-chain trading capabilities for Antex Protocol, mirroring the features of the Go SDK.
+This package provides HTTP, WebSocket, and on-chain trading capabilities for Antx Protocol, mirroring the features of the Go SDK.
 
 Features:
 - HTTP APIs: coins, exchanges, klines, funding, orders, assets, transactions
@@ -14,10 +14,10 @@ pip install -e .
 
 Basic usage:
 ```python
-from antex_sdk.client import AntexClient
-from antex_sdk.constants import KLINE_TYPE_MINUTE_1, PRICE_TYPE_LAST
+from antx_sdk.client import AntxClient
+from antx_sdk.constants import KLINE_TYPE_MINUTE_1, PRICE_TYPE_LAST
 
-client = AntexClient(base_url="https://testnet.antex.ai", ws_url="wss://testnet.antex.ai/api/v1/ws")
+client = AntxClient(base_url="https://testnet.antxfi.com", ws_url="wss://testnet.antxfi.com/api/v1/ws")
 coins = client.get_coin_list()
 exchanges = client.get_exchange_list()
 
@@ -31,7 +31,7 @@ print(kline)
 ```
 
 Protobufs:
-- Python protobuf files are expected under `python/antex_proto/`. They can be generated from `golang/vendor/github.com/antexprotocol/antex-proto/proto/**`.
+- Python protobuf files are expected under `python/antx_proto/`. They can be generated from `proto/antx/**`.
 
 License: Apache-2.0
 

@@ -6,12 +6,12 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "antex-sdk"
+name = "antx-sdk"
 version = "0.1.0"
-description = "Antex SDK for Python: HTTP, WebSocket, and on-chain trading support"
+description = "Antx SDK for Python: HTTP, WebSocket, and on-chain trading support"
 readme = "README.md"
 authors = [
-  { name = "Antex Protocol" }
+  { name = "Antx Protocol" }
 ]
 license = { text = "Apache-2.0" }
 requires-python = ">=3.8"
@@ -29,12 +29,12 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/antexprotocol/antex-sdk"
+Homepage = "https://github.com/antxprotocol/antx-sdk"
 
 [tool.setuptools]
 packages = [
-  "antex_sdk",
-  "antex_proto",
+  "antx_sdk",
+  "antx_proto",
 ]
 package-dir = {"" = "."}
 include-package-data = true

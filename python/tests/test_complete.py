@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Complete functionality test for Antex SDK Python
+Complete functionality test for Antx SDK Python
 
 This test verifies:
 - Imports and proto availability
@@ -15,18 +15,18 @@ import sys
 import time
 import os
 
-# Add parent directory to path to import antex_sdk
+# Add parent directory to path to import antx_sdk
 script_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(script_dir)
 sys.path.insert(0, parent_dir)
 
-from antex_sdk.client import AntexClient
-from antex_sdk.constants import ACCOUNT_HRP
+from antx_sdk.client import AntxClient
+from antx_sdk.constants import ACCOUNT_HRP
 
 # Configuration
-GATEWAY = "https://testnet.antex.ai"
-WS = "wss://testnet.antex.ai/api/v1/ws"
-CHAIN_ID = "antex-testnet"
+GATEWAY = "https://testnet.antxfi.com"
+WS = "wss://testnet.antxfi.com/api/v1/ws"
+CHAIN_ID = "antx-testnet"
 
 # Load private key from file
 def load_private_key():
@@ -51,8 +51,8 @@ def test_imports():
     """Test all necessary imports"""
     print("\n[1/7] Testing imports...")
     try:
-        from antex_sdk.client import AntexClient
-        from antex_sdk.tx import COSMOS_PROTO_AVAILABLE
+        from antx_sdk.client import AntxClient
+        from antx_sdk.tx import COSMOS_PROTO_AVAILABLE
         if not COSMOS_PROTO_AVAILABLE:
             print("✗ Cosmos proto not available!")
             return False
@@ -69,7 +69,7 @@ def test_client_creation():
     """Test client creation"""
     print("\n[2/7] Creating client...")
     try:
-        client = AntexClient(base_url=GATEWAY, ws_url=WS)
+        client = AntxClient(base_url=GATEWAY, ws_url=WS)
         print(f"✓ Client created")
         return client
     except Exception as e:
@@ -108,9 +108,9 @@ def test_transaction_messages(client):
         print(f"   Please create {key_file} with your test private key to run this test.")
         return None
     try:
-        from antex_proto.antex.chain.agent import tx_pb2 as agent_tx
-        from antex_proto.antex.chain.order import tx_pb2 as order_tx
-        from antex_sdk.crypto import eth_personal_sign
+        from antx_proto.antx.chain.agent import tx_pb2 as agent_tx
+        from antx_proto.antx.chain.order import tx_pb2 as order_tx
+        from antx_sdk.crypto import eth_personal_sign
 
         agent_addr = client._agent_address_bech32
         create_ms = int(time.time() * 1000)
@@ -179,8 +179,8 @@ def test_transaction_building(client):
         print(f"   Please create {key_file} with your test private key to run this test.")
         return None
     try:
-        from antex_sdk.tx import pack_any, build_tx_body, build_auth_info
-        from antex_proto.antex.chain.agent import tx_pb2 as agent_tx
+        from antx_sdk.tx import pack_any, build_tx_body, build_auth_info
+        from antx_proto.antx.chain.agent import tx_pb2 as agent_tx
 
         agent_addr = client._agent_address_bech32
         msg = agent_tx.MsgBindAgent(
@@ -192,7 +192,7 @@ def test_transaction_building(client):
             chain_signature="0x0000",
         )
 
-        any_msg = pack_any(msg, "/antex.chain.agent.MsgBindAgent")
+        any_msg = pack_any(msg, "/antx.chain.agent.MsgBindAgent")
         body = build_tx_body([any_msg])
         print(f"✓ TxBody created: {len(body.messages)} message(s)")
 
@@ -308,7 +308,7 @@ def test_websocket(client):
 def main():
     """Run all tests"""
     print("=" * 60)
-    print("Antex SDK Python - Complete Functionality Test")
+    print("Antx SDK Python - Complete Functionality Test")
     print("=" * 60)
 
     if not test_imports():
