@@ -53,7 +53,7 @@ Before running examples, please ensure:
 1. **Update configuration**: Modify configuration constants in `complete_example.go`
    ```go
    const (
-       chainID         = "antex-testnet"  // Chain ID
+       chainID         = "antx-testnet"  // Chain ID
        ethPrivateKey   = "your_eth_private_key"   // Ethereum private key
        agentPrivateKey = "your_agent_private_key" // Agent private key
    )

@@ -14,7 +14,7 @@ replace (
 require (
 	cosmossdk.io/errors v1.0.2
 	cosmossdk.io/x/tx v0.14.0
-	github.com/antxprotocol/antx-proto v0.0.0-20251112141230-52c6bd8b14dd
+	github.com/antxprotocol/antx-proto v0.0.0-20260112065238-b428292b1621
 	github.com/cosmos/cosmos-sdk v0.53.0
 	github.com/ethereum/go-ethereum v1.15.11
 	github.com/gorilla/websocket v1.5.3

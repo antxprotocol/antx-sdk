@@ -3,9 +3,9 @@ package sdk
 import sdk "github.com/cosmos/cosmos-sdk/types"
 
 const (
-	AccountAddressPrefix = "antex"
+	AccountAddressPrefix = "antx"
 	ChainCoinType        = uint32(118)
-	PlatformToken        = "antex"
+	PlatformToken        = "antx"
 )
 
 func init() {

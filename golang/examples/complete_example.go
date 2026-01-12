@@ -15,9 +15,9 @@ import (
 
 var (
 	// Basic configuration
-	gatewayURL = "https://testnet.antex.ai"
-	wsURL      = "wss://testnet.antex.ai/api/v1/ws"
-	chainID    = "antex-testnet"
+	gatewayURL = "https://testnet.antxfi.com"
+	wsURL      = "wss://testnet.antxfi.com/api/v1/ws"
+	chainID    = "antx-testnet"
 
 	// Credential configuration (example uses real test credentials)
 	ethPrivateKey   = ""
