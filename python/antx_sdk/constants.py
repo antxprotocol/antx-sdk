@@ -80,5 +80,5 @@ MSG_CLOSE_ALL_POSITION_TYPE_URL = "/antx.chain.order.MsgCloseAllPosition"
 MSG_BIND_AGENT_TYPE_URL = "/antx.chain.agent.MsgBindAgent"
 
 # Account HRP
-ACCOUNT_HRP = "antx"
+ACCOUNT_HRP = "omni"
 

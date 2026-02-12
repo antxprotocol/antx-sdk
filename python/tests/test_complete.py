@@ -20,23 +20,34 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(script_dir)
 sys.path.insert(0, parent_dir)
 
+# Ensure dependencies are available (run with venv: .venv/bin/python tests/test_complete.py)
+try:
+    import requests  # noqa: F401
+except ModuleNotFoundError:
+    venv_python = os.path.join(parent_dir, ".venv", "bin", "python")
+    print("Missing dependency 'requests'. Run with the project venv:")
+    print(f"  {venv_python} tests/test_complete.py")
+    print("Or from python dir:  .venv/bin/python tests/test_complete.py")
+    print("Or install the package:  pip install -e .")
+    sys.exit(1)
+
 from antx_sdk.client import AntxClient
 from antx_sdk.constants import ACCOUNT_HRP
 
 # Configuration
-GATEWAY = "https://testnet.antxfi.com"
-WS = "wss://testnet.antxfi.com/api/v1/ws"
-CHAIN_ID = "antx-testnet"
+GATEWAY = "https://devnet.antxfi.com"
+WS = "wss://devnet.antxfi.com/api/v1/ws"
+CHAIN_ID = "omni-devnet"
 
 # Load private key from file
 def load_private_key():
     """Load private key from .test_private_key file, returns None if file not found"""
     script_dir = os.path.dirname(os.path.abspath(__file__))
     key_file = os.path.join(script_dir, '.test_private_key')
-    
+
     if not os.path.exists(key_file):
         return None
-    
+
     with open(key_file, 'r') as f:
         key = f.read().strip()
         # Remove 0x prefix if present
@@ -218,7 +229,7 @@ def test_http_queries(client):
     except Exception as e:
         error_msg = str(e)
         print(f"⚠ get_coin_list: {type(e).__name__}")
-        
+
         # Extract request details - traverse exception chain to find the one with details
         details = None
         response_obj = None
@@ -232,7 +243,7 @@ def test_http_queries(client):
             if hasattr(exc, 'response') and exc.response:
                 response_obj = exc.response
             exc = getattr(exc, '__cause__', None)
-        
+
         if details:
             print(f"  Request Method: {details.get('method', 'N/A')}")
             print(f"  Request URL: {details.get('url', 'N/A')}")
@@ -274,10 +285,10 @@ def test_http_queries(client):
             print(f"  Response: {e.response.text[:200] if e.response.text else 'Empty'}")
         else:
             print(f"  Error: {error_msg[:300]}")
-        
+
         if "405" in error_msg or (hasattr(e, 'response') and e.response.status_code == 405):
             print(f"  Note: Gateway may require different HTTP method or authentication")
-        
+
         return False  # Non-critical, don't fail the test
 
 
@@ -336,21 +347,21 @@ def main():
         print("✓ Address derivation: OK")
     else:
         print("✗ Address derivation: Failed")
-    
+
     if msg_ok is None:
         print("⚠ Transaction message creation: Skipped (private key not found)")
     elif msg_ok:
         print("✓ Transaction message creation: OK")
     else:
         print("✗ Transaction message creation: Failed")
-    
+
     if build_ok is None:
         print("⚠ Transaction building: Skipped (private key not found)")
     elif build_ok:
         print("✓ Transaction building: OK")
     else:
         print("✗ Transaction building: Failed")
-    
+
     if http_ok:
         print("✓ HTTP queries: OK")
     else:
@@ -360,7 +371,7 @@ def main():
     else:
         print("⚠ WebSocket: Failed (non-critical, may need gateway config)")
     print("=" * 60)
-    
+
     if PRIV is None:
         script_dir = os.path.dirname(os.path.abspath(__file__))
         key_file = os.path.join(script_dir, '.test_private_key')

@@ -1,6 +1,15 @@
 import base64
+import sys
 import time
+from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
+
+# Ensure generated proto modules can resolve internal imports (amino, antx, cosmos, etc.)
+# Must run before importing .tx (which uses antx_proto.cosmos) or antx_proto.antx
+_antx_proto_root = Path(__file__).resolve().parent.parent / "antx_proto"
+_antx_proto_str = str(_antx_proto_root)
+if _antx_proto_str not in sys.path:
+    sys.path.insert(0, _antx_proto_str)
 
 from . import constants as C
 from .constants import ACCOUNT_HRP

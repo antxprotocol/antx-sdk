@@ -15,9 +15,9 @@ import (
 
 var (
 	// Basic configuration
-	gatewayURL = "https://testnet.antxfi.com"
-	wsURL      = "wss://testnet.antxfi.com/api/v1/ws"
-	chainID    = "antx-testnet"
+	gatewayURL = "https://devnet.antxfi.com"
+	wsURL      = "wss://devnet.antxfi.com/api/v1/ws"
+	chainID    = "omni-devnet"
 
 	// Credential configuration (example uses real test credentials)
 	ethPrivateKey   = ""
@@ -279,7 +279,7 @@ func demoTradingFunctions(client *sdk.AntxClient) {
 		ClientOrderId:     "test-order-001",
 		TimeInForce:       1, // GTC
 		ReduceOnly:        false,
-		ExpireTime:        uint64(time.Now().Add(24 * time.Hour).Unix()), // Expires in 24 hours
+		ExpireTime:        uint64(time.Now().Add(24 * time.Hour).UnixMicro()), // Expires in 24 hours
 		IsMarket:          false,
 		IsPositionTp:      false,
 		IsPositionSl:      false,
@@ -317,7 +317,7 @@ func demoTradingFunctions(client *sdk.AntxClient) {
 		ClientOrderId:     "test-market-order-001",
 		TimeInForce:       3, // IOC more suitable for market orders
 		ReduceOnly:        false,
-		ExpireTime:        uint64(time.Now().Add(24 * time.Hour).Unix()), // Expires in 24 hours
+		ExpireTime:        uint64(time.Now().Add(24 * time.Hour).UnixMicro()), // Expires in 24 hours
 		IsMarket:          true,                                          // Market order
 		IsPositionTp:      false,
 		IsPositionSl:      false,
@@ -372,7 +372,7 @@ func demoTradingFunctions(client *sdk.AntxClient) {
 				ClientOrderId:     "batch-order-001",
 				TimeInForce:       1,
 				ReduceOnly:        false,
-				ExpireTime:        uint64(time.Now().Add(24 * time.Hour).Unix()), // Expires in 24 hours
+				ExpireTime:        uint64(time.Now().Add(24 * time.Hour).UnixMicro()), // Expires in 24 hours
 				IsMarket:          false,
 				IsPositionTp:      false,
 				IsPositionSl:      false,
@@ -391,7 +391,7 @@ func demoTradingFunctions(client *sdk.AntxClient) {
 				ClientOrderId:     "batch-order-002",
 				TimeInForce:       1,
 				ReduceOnly:        false,
-				ExpireTime:        uint64(time.Now().Add(24 * time.Hour).Unix()), // Expires in 24 hours
+				ExpireTime:        uint64(time.Now().Add(24 * time.Hour).UnixMicro()), // Expires in 24 hours
 				IsMarket:          false,
 				IsPositionTp:      false,
 				IsPositionSl:      false,

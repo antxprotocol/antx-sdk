@@ -17,7 +17,7 @@ Basic usage:
 from antx_sdk.client import AntxClient
 from antx_sdk.constants import KLINE_TYPE_MINUTE_1, PRICE_TYPE_LAST
 
-client = AntxClient(base_url="https://testnet.antxfi.com", ws_url="wss://testnet.antxfi.com/api/v1/ws")
+client = AntxClient(base_url="https://devnet.antxfi.com", ws_url="wss://devnet.antxfi.com/api/v1/ws")
 coins = client.get_coin_list()
 exchanges = client.get_exchange_list()
 

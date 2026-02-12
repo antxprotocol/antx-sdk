@@ -31,9 +31,9 @@ from antx_sdk.constants import (
 
 
 # Configuration
-GATEWAY_URL = os.environ.get("ANTX_GATEWAY", "https://testnet.antxfi.com")
-WS_URL = os.environ.get("ANTX_WS", "wss://testnet.antxfi.com/api/v1/ws")
-CHAIN_ID = os.environ.get("ANTX_CHAIN_ID", "antx-testnet")
+GATEWAY_URL = os.environ.get("ANTX_GATEWAY", "https://devnet.antxfi.com")
+WS_URL = os.environ.get("ANTX_WS", "wss://devnet.antxfi.com/api/v1/ws")
+CHAIN_ID = os.environ.get("ANTX_CHAIN_ID", "omni-devnet")
 
 # Credentials (set via environment variables or replace with your keys)
 ETH_PRIVATE_KEY = os.environ.get("ETH_PRIVATE_KEY", "")
@@ -194,11 +194,11 @@ def demo_trading_functions(client: AntxClient):
             if sub_list:
                 test_subaccount_id = sub_list[0].get("id", "")
                 print(f"✓ Found subaccount: {test_subaccount_id}")
-                
+
                 # Convert subaccount ID to int
                 test_subaccount_id_int = int(test_subaccount_id)
                 exchange_id_int = int(DEFAULT_EXCHANGE_ID)
-                
+
                 print("\n4.3 Creating limit buy order...")
                 try:
                     create_order_req = {
@@ -214,7 +214,7 @@ def demo_trading_functions(client: AntxClient):
                         "clientOrderId": "py-test-001",
                         "timeInForce": 1,  # GTC
                         "reduceOnly": False,
-                        "expireTime": int(time.time()) + 86400,  # 24 hours
+                        "expireTime": int((time.time() + 86400) * 1_000_000),  # 24 hours (microseconds)
                         "isMarket": False,
                         "isPositionTp": False,
                         "isPositionSl": False,
@@ -248,7 +248,7 @@ def demo_trading_functions(client: AntxClient):
                         "clientOrderId": "py-market-001",
                         "timeInForce": 3,  # IOC (more suitable for market orders)
                         "reduceOnly": False,
-                        "expireTime": int(time.time()) + 86400,  # 24 hours
+                        "expireTime": int((time.time() + 86400) * 1_000_000),  # 24 hours (microseconds)
                         "isMarket": True,  # Market order
                         "isPositionTp": False,
                         "isPositionSl": False,
@@ -295,7 +295,7 @@ def demo_trading_functions(client: AntxClient):
                                 "clientOrderId": "batch-order-001",
                                 "timeInForce": 1,
                                 "reduceOnly": False,
-                                "expireTime": int(time.time()) + 86400,  # 24 hours
+                                "expireTime": int((time.time() + 86400) * 1_000_000),  # 24 hours (microseconds)
                                 "isMarket": False,
                                 "isPositionTp": False,
                                 "isPositionSl": False,
@@ -314,7 +314,7 @@ def demo_trading_functions(client: AntxClient):
                                 "clientOrderId": "batch-order-002",
                                 "timeInForce": 1,
                                 "reduceOnly": False,
-                                "expireTime": int(time.time()) + 86400,  # 24 hours
+                                "expireTime": int((time.time() + 86400) * 1_000_000),  # 24 hours (microseconds)
                                 "isMarket": False,
                                 "isPositionTp": False,
                                 "isPositionSl": False,
