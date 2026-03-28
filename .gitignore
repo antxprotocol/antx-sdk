@@ -94,3 +94,9 @@ Thumbs.db
 .env
 .env.local
 python/scripts
+.claude/
+.cursor/
+.cursorrules/
+.vscode/
+.build-workflow/
+

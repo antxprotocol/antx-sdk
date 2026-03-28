@@ -15,9 +15,17 @@ import (
 
 var (
 	// Basic configuration
-	gatewayURL = "https://devnet.antxfi.com"
-	wsURL      = "wss://devnet.antxfi.com/api/v1/ws"
-	chainID    = "omni-devnet"
+	isMainnet = false
+
+	// devnet config
+	devnet_gatewayURL = "https://devnet.antxfi.com"
+	devnet_wsURL      = "wss://devnet.antxfi.com/api/v1/ws"
+	devnet_chainID    = "omni-devnet"
+
+	// mainnet config
+	mainnet_gatewayURL = "https://app.antxfi.com"
+	mainnet_wsURL      = "wss://app.antxfi.com/api/v1/ws"
+	mainnet_chainID    = "9561"
 
 	// Credential configuration (example uses real test credentials)
 	ethPrivateKey   = ""
@@ -41,6 +49,21 @@ func init() {
 }
 
 func main() {
+	if isMainnet {
+		gatewayURL = mainnet_gatewayURL
+		wsURL = mainnet_wsURL
+		chainID = mainnet_chainID
+	} else {
+		gatewayURL = devnet_gatewayURL
+		wsURL = devnet_wsURL
+		chainID = devnet_chainID
+	}
+
+	fmt.Printf("Using mainnet: %t\n", isMainnet)
+	fmt.Printf("Using gateway URL: %s\n", gatewayURL)
+	fmt.Printf("Using ws URL: %s\n", wsURL)
+	fmt.Printf("Using chain ID: %s\n", chainID)
+
 	// Create SDK client (using top-level unified variables)
 	client, err := sdk.NewAntxClient(sdk.Config{
 		GatewayHost:     gatewayURL,
@@ -318,7 +341,7 @@ func demoTradingFunctions(client *sdk.AntxClient) {
 		TimeInForce:       3, // IOC more suitable for market orders
 		ReduceOnly:        false,
 		ExpireTime:        uint64(time.Now().Add(24 * time.Hour).UnixMicro()), // Expires in 24 hours
-		IsMarket:          true,                                          // Market order
+		IsMarket:          true,                                               // Market order
 		IsPositionTp:      false,
 		IsPositionSl:      false,
 		TriggerType:       0,

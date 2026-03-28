@@ -30,10 +30,32 @@ from antx_sdk.constants import (
 )
 
 
-# Configuration
-GATEWAY_URL = os.environ.get("ANTX_GATEWAY", "https://devnet.antxfi.com")
-WS_URL = os.environ.get("ANTX_WS", "wss://devnet.antxfi.com/api/v1/ws")
-CHAIN_ID = os.environ.get("ANTX_CHAIN_ID", "omni-devnet")
+# Basic configuration
+IS_MAINNET = False
+
+# devnet config
+DEVNET_GATEWAY_URL = "https://devnet.antxfi.com"
+DEVNET_WS_URL = "wss://devnet.antxfi.com/api/v1/ws"
+DEVNET_CHAIN_ID = "omni-devnet"
+
+# mainnet config
+MAINNET_GATEWAY_URL = "https://app.antxfi.com"
+MAINNET_WS_URL = "wss://app.antxfi.com/api/v1/ws"
+MAINNET_CHAIN_ID = "9561"
+
+if IS_MAINNET:
+    GATEWAY_URL = MAINNET_GATEWAY_URL
+    WS_URL = MAINNET_WS_URL
+    CHAIN_ID = MAINNET_CHAIN_ID
+else:
+    GATEWAY_URL = DEVNET_GATEWAY_URL
+    WS_URL = DEVNET_WS_URL
+    CHAIN_ID = DEVNET_CHAIN_ID
+
+print(f"Using mainnet: {IS_MAINNET}")
+print(f"Using gateway URL: {GATEWAY_URL}")
+print(f"Using ws URL: {WS_URL}")
+print(f"Using chain ID: {CHAIN_ID}")
 
 # Credentials (set via environment variables or replace with your keys)
 ETH_PRIVATE_KEY = os.environ.get("ETH_PRIVATE_KEY", "")

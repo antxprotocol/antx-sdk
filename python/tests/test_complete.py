@@ -34,10 +34,32 @@ except ModuleNotFoundError:
 from antx_sdk.client import AntxClient
 from antx_sdk.constants import ACCOUNT_HRP
 
-# Configuration
-GATEWAY = "https://devnet.antxfi.com"
-WS = "wss://devnet.antxfi.com/api/v1/ws"
-CHAIN_ID = "omni-devnet"
+# Basic configuration
+IS_MAINNET = False
+
+# devnet config
+DEVNET_GATEWAY = "https://devnet.antxfi.com"
+DEVNET_WS = "wss://devnet.antxfi.com/api/v1/ws"
+DEVNET_CHAIN_ID = "omni-devnet"
+
+# mainnet config
+MAINNET_GATEWAY = "https://app.antxfi.com"
+MAINNET_WS = "wss://app.antxfi.com/api/v1/ws"
+MAINNET_CHAIN_ID = "9561"
+
+if IS_MAINNET:
+    GATEWAY = MAINNET_GATEWAY
+    WS = MAINNET_WS
+    CHAIN_ID = MAINNET_CHAIN_ID
+else:
+    GATEWAY = DEVNET_GATEWAY
+    WS = DEVNET_WS
+    CHAIN_ID = DEVNET_CHAIN_ID
+
+print(f"Using mainnet: {IS_MAINNET}")
+print(f"Using gateway URL: {GATEWAY}")
+print(f"Using ws URL: {WS}")
+print(f"Using chain ID: {CHAIN_ID}")
 
 # Load private key from file
 def load_private_key():
