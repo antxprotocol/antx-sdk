@@ -34,6 +34,10 @@ var (
 
 	// Example default parameters
 	defaultExchangeId = "200001"
+
+	gatewayURL = ""
+	wsURL      = ""
+	chainID    = ""
 )
 
 func init() {
@@ -292,8 +296,8 @@ func demoTradingFunctions(client *sdk.AntxClient) {
 	createOrderReq := types.CreateOrderParam{
 		SubaccountId:      subaccountIdUint,
 		ExchangeId:        exchangeIdUint,
-		MarginMode:        1, // Full margin mode
-		Leverage:          1, // 1x leverage
+		MarginMode:        1,  // Full margin mode
+		Leverage:          20, // 1x leverage
 		IsBuy:             true,
 		PriceScale:        2,      // Price precision: 2 decimal places
 		PriceValue:        100000, // Price 1000.00 (100000/100)
@@ -302,7 +306,7 @@ func demoTradingFunctions(client *sdk.AntxClient) {
 		ClientOrderId:     "test-order-001",
 		TimeInForce:       1, // GTC
 		ReduceOnly:        false,
-		ExpireTime:        uint64(time.Now().Add(24 * time.Hour).UnixMicro()), // Expires in 24 hours
+		ExpireTime:        uint64(time.Now().Add(24*time.Hour).UnixNano() / 1e6), // Expires in 24 hours
 		IsMarket:          false,
 		IsPositionTp:      false,
 		IsPositionSl:      false,
@@ -330,8 +334,8 @@ func demoTradingFunctions(client *sdk.AntxClient) {
 	marketOrderReq := types.CreateOrderParam{
 		SubaccountId:      subaccountIdUint,
 		ExchangeId:        exchangeIdUint,
-		MarginMode:        1, // Full margin mode
-		Leverage:          1, // 1x leverage
+		MarginMode:        1,  // Full margin mode
+		Leverage:          20, // 1x leverage
 		IsBuy:             false,
 		PriceScale:        2,
 		PriceValue:        0, // Market order price is 0
@@ -340,8 +344,8 @@ func demoTradingFunctions(client *sdk.AntxClient) {
 		ClientOrderId:     "test-market-order-001",
 		TimeInForce:       3, // IOC more suitable for market orders
 		ReduceOnly:        false,
-		ExpireTime:        uint64(time.Now().Add(24 * time.Hour).UnixMicro()), // Expires in 24 hours
-		IsMarket:          true,                                               // Market order
+		ExpireTime:        uint64(time.Now().Add(24*time.Hour).UnixNano() / 1e6), // Expires in 24 hours
+		IsMarket:          true,                                                  // Market order
 		IsPositionTp:      false,
 		IsPositionSl:      false,
 		TriggerType:       0,
@@ -395,7 +399,7 @@ func demoTradingFunctions(client *sdk.AntxClient) {
 				ClientOrderId:     "batch-order-001",
 				TimeInForce:       1,
 				ReduceOnly:        false,
-				ExpireTime:        uint64(time.Now().Add(24 * time.Hour).UnixMicro()), // Expires in 24 hours
+				ExpireTime:        uint64(time.Now().Add(24*time.Hour).UnixNano() / 1e6), // Expires in 24 hours
 				IsMarket:          false,
 				IsPositionTp:      false,
 				IsPositionSl:      false,
@@ -414,7 +418,7 @@ func demoTradingFunctions(client *sdk.AntxClient) {
 				ClientOrderId:     "batch-order-002",
 				TimeInForce:       1,
 				ReduceOnly:        false,
-				ExpireTime:        uint64(time.Now().Add(24 * time.Hour).UnixMicro()), // Expires in 24 hours
+				ExpireTime:        uint64(time.Now().Add(24*time.Hour).UnixNano() / 1e6), // Expires in 24 hours
 				IsMarket:          false,
 				IsPositionTp:      false,
 				IsPositionSl:      false,

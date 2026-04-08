@@ -236,7 +236,7 @@ def demo_trading_functions(client: AntxClient):
                         "clientOrderId": "py-test-001",
                         "timeInForce": 1,  # GTC
                         "reduceOnly": False,
-                        "expireTime": int((time.time() + 86400) * 1_000_000),  # 24 hours (microseconds)
+                        "expireTime": int((time.time() + 86400) * 1_000),  # 24 hours (milliseconds)
                         "isMarket": False,
                         "isPositionTp": False,
                         "isPositionSl": False,
@@ -270,7 +270,7 @@ def demo_trading_functions(client: AntxClient):
                         "clientOrderId": "py-market-001",
                         "timeInForce": 3,  # IOC (more suitable for market orders)
                         "reduceOnly": False,
-                        "expireTime": int((time.time() + 86400) * 1_000_000),  # 24 hours (microseconds)
+                        "expireTime": int((time.time() + 86400) * 1_000),  # 24 hours (milliseconds)
                         "isMarket": True,  # Market order
                         "isPositionTp": False,
                         "isPositionSl": False,
@@ -317,7 +317,7 @@ def demo_trading_functions(client: AntxClient):
                                 "clientOrderId": "batch-order-001",
                                 "timeInForce": 1,
                                 "reduceOnly": False,
-                                "expireTime": int((time.time() + 86400) * 1_000_000),  # 24 hours (microseconds)
+                                "expireTime": int((time.time() + 86400) * 1_000),  # 24 hours (milliseconds)
                                 "isMarket": False,
                                 "isPositionTp": False,
                                 "isPositionSl": False,
@@ -336,7 +336,7 @@ def demo_trading_functions(client: AntxClient):
                                 "clientOrderId": "batch-order-002",
                                 "timeInForce": 1,
                                 "reduceOnly": False,
-                                "expireTime": int((time.time() + 86400) * 1_000_000),  # 24 hours (microseconds)
+                                "expireTime": int((time.time() + 86400) * 1_000),  # 24 hours (milliseconds)
                                 "isMarket": False,
                                 "isPositionTp": False,
                                 "isPositionSl": False,
