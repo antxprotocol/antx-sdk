@@ -1,8 +1,10 @@
 import base64
 import sys
 import time
+from dataclasses import asdict, is_dataclass
+from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple, Union
 
 # Ensure generated proto modules can resolve internal imports (amino, antx, cosmos, etc.)
 # Must run before importing .tx (which uses antx_proto.cosmos) or antx_proto.antx
@@ -12,6 +14,25 @@ if _antx_proto_str not in sys.path:
     sys.path.insert(0, _antx_proto_str)
 
 from . import constants as C
+from .types import (
+    CancelAllOrderParam,
+    CancelOrderByClientIdParam,
+    CancelOrderParam,
+    ChainTransactionDetail,
+    CloseAllPositionParam,
+    CreateOrderBatchParam,
+    CreateOrderParam,
+    GetActiveOrderReq,
+    GetAssetSnapshotReq,
+    GetCollateralTransactionReq,
+    GetFundingHistoryReq,
+    GetHistoryOrderFillTransactionReq,
+    GetHistoryOrderReq,
+    GetHistoryPositionTermReq,
+    GetKLineReq,
+    GetPerpetualAccountAssetReq,
+    GetPositionTransactionReq,
+)
 from .constants import ACCOUNT_HRP
 from .http import HTTPClient
 from .ws import WebSocketClient, parse_wrapped_first
@@ -38,6 +59,79 @@ try:
 except Exception:  # noqa: BLE001
     agent_tx = None
     order_tx = None
+
+
+def _unwrap_enums(value: Any) -> Any:
+    """Recursively replace Enum members with their underlying value.
+
+    Required because urllib.parse.urlencode calls str() on each value, and
+    `str(KLineType.MINUTE_1)` returns "KLineType.MINUTE_1" rather than the
+    intended "MINUTE_1". IntEnum members survive == int comparisons but
+    we still unwrap them for clean JSON / log output.
+    """
+    if isinstance(value, Enum):
+        return value.value
+    if isinstance(value, dict):
+        return {k: _unwrap_enums(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_unwrap_enums(v) for v in value]
+    return value
+
+
+class TxFailedError(RuntimeError):
+    """Raised when a transaction was included on chain but execution failed.
+
+    Attributes:
+        tx_hash: the hash of the failed transaction
+        error_code: chain-side error code (see antx-proto */err.proto)
+        error: raw error payload returned by the explorer endpoint
+        detail: full ChainTransactionDetail for debugging
+    """
+
+    def __init__(self, detail: ChainTransactionDetail) -> None:
+        super().__init__(
+            f"transaction {detail.hash} failed at block {detail.block} "
+            f"(errorCode={detail.errorCode}, error={detail.error!r})"
+        )
+        self.tx_hash = detail.hash
+        self.error_code = detail.errorCode
+        self.error = detail.error
+        self.detail = detail
+
+
+class TxPendingTimeoutError(TimeoutError):
+    """Raised when a transaction did not get included within the wait budget.
+
+    The tx may still land on chain later — this only signals the client gave
+    up waiting. Call ``client.wait_for_tx(tx_hash)`` again with a larger
+    timeout to keep polling.
+    """
+
+    def __init__(self, tx_hash: str, timeout: float) -> None:
+        super().__init__(
+            f"transaction {tx_hash} not confirmed within {timeout:.1f}s"
+        )
+        self.tx_hash = tx_hash
+        self.timeout = timeout
+
+
+def _to_dict(params: Any) -> Dict[str, Any]:
+    """Normalize a request parameter to a plain dict with primitive values.
+
+    Accepts either a dataclass instance (e.g. CreateOrderParam) or a dict.
+    Returns a new dict so callers can freely mutate it. Any Enum members
+    nested inside are unwrapped to their .value, so the dict is safe to
+    pass to urlencode / json.dumps / protobuf message constructors.
+    """
+    if params is None:
+        return {}
+    if is_dataclass(params) and not isinstance(params, type):
+        return _unwrap_enums(asdict(params))
+    if isinstance(params, dict):
+        return _unwrap_enums(dict(params))
+    raise TypeError(
+        f"expected dataclass or dict for request params, got {type(params).__name__}"
+    )
 
 
 class AntxClient:
@@ -162,71 +256,81 @@ class AntxClient:
     def get_eth_address(self, antx_bech32_address: str) -> str:
         return convert_to_eth_addr(antx_bech32_address)
 
-    def get_kline(self, req: Dict[str, Any]) -> Any:
-        params = {k: v for k, v in req.items() if v not in (None, "", 0)}
+    def get_kline(self, req: Union[GetKLineReq, Dict[str, Any]]) -> Any:
+        d = _to_dict(req)
+        params = {k: v for k, v in d.items() if v not in (None, "", 0)}
         resp = self._http_get(C.GET_KLINE_PATH, params)
         if resp.get("code") != "0":
             raise RuntimeError(f"get kline failed: {resp.get('msg')}")
         return resp
 
-    def get_funding_history(self, req: Dict[str, Any]) -> Any:
-        params = {k: v for k, v in req.items() if v not in (None, "", 0, False)}
+    def get_funding_history(self, req: Union[GetFundingHistoryReq, Dict[str, Any]]) -> Any:
+        d = _to_dict(req)
+        params = {k: v for k, v in d.items() if v not in (None, "", 0, False)}
         resp = self._http_get(C.GET_FUNDING_HISTORY_PATH, params)
         if resp.get("code") != "0":
             raise RuntimeError(f"get funding history failed: {resp.get('msg')}")
         return resp
 
-    def get_active_order(self, req: Dict[str, Any]) -> Any:
-        params = {k: v for k, v in req.items() if v not in (None, "")}
+    def get_active_order(self, req: Union[GetActiveOrderReq, Dict[str, Any]]) -> Any:
+        d = _to_dict(req)
+        params = {k: v for k, v in d.items() if v not in (None, "")}
         resp = self._http_get(C.GET_ACTIVE_ORDER_PATH, params)
         if resp.get("code") != "0":
             raise RuntimeError(f"get active order failed: {resp.get('msg')}")
         return resp
 
-    def get_history_order(self, req: Dict[str, Any]) -> Any:
-        params = {k: v for k, v in req.items() if v not in (None, "")}
+    def get_history_order(self, req: Union[GetHistoryOrderReq, Dict[str, Any]]) -> Any:
+        d = _to_dict(req)
+        params = {k: v for k, v in d.items() if v not in (None, "")}
         resp = self._http_get(C.GET_HISTORY_ORDER_PATH, params)
         if resp.get("code") != "0":
             raise RuntimeError(f"get history order failed: {resp.get('msg')}")
         return resp
 
-    def get_perpetual_account_asset(self, req: Dict[str, Any]) -> Any:
-        params = {k: v for k, v in req.items() if v not in (None, "")}
+    def get_perpetual_account_asset(self, req: Union[GetPerpetualAccountAssetReq, Dict[str, Any]]) -> Any:
+        d = _to_dict(req)
+        params = {k: v for k, v in d.items() if v not in (None, "")}
         resp = self._http_get(C.GET_PERPETUAL_ACCOUNT_ASSET_PATH, params)
         if resp.get("code") != "0":
             raise RuntimeError(f"get perpetual account asset failed: {resp.get('msg')}")
         return resp
 
-    def get_position_transaction(self, req: Dict[str, Any]) -> Any:
-        params = {k: v for k, v in req.items() if v not in (None, "", 0)}
+    def get_position_transaction(self, req: Union[GetPositionTransactionReq, Dict[str, Any]]) -> Any:
+        d = _to_dict(req)
+        params = {k: v for k, v in d.items() if v not in (None, "", 0)}
         resp = self._http_get(C.GET_POSITION_TRANSACTION_PATH, params)
         if resp.get("code") != "0":
             raise RuntimeError(f"get position transaction failed: {resp.get('msg')}")
         return resp
 
-    def get_collateral_transaction(self, req: Dict[str, Any]) -> Any:
-        params = {k: v for k, v in req.items() if v not in (None, "", 0)}
+    def get_collateral_transaction(self, req: Union[GetCollateralTransactionReq, Dict[str, Any]]) -> Any:
+        d = _to_dict(req)
+        params = {k: v for k, v in d.items() if v not in (None, "", 0)}
         resp = self._http_get(C.GET_COLLATERAL_TRANSACTION_PATH, params)
         if resp.get("code") != "0":
             raise RuntimeError(f"get collateral transaction failed: {resp.get('msg')}")
         return resp
 
-    def get_asset_snapshot(self, req: Dict[str, Any]) -> Any:
-        params = {k: v for k, v in req.items() if v not in (None, "", 0)}
+    def get_asset_snapshot(self, req: Union[GetAssetSnapshotReq, Dict[str, Any]]) -> Any:
+        d = _to_dict(req)
+        params = {k: v for k, v in d.items() if v not in (None, "", 0)}
         resp = self._http_get(C.GET_ASSET_SNAPSHOT_PATH, params)
         if resp.get("code") != "0":
             raise RuntimeError(f"get asset snapshot failed: {resp.get('msg')}")
         return resp
 
-    def get_history_order_fill_transaction(self, req: Dict[str, Any]) -> Any:
-        params = {k: v for k, v in req.items() if v not in (None, "", 0)}
+    def get_history_order_fill_transaction(self, req: Union[GetHistoryOrderFillTransactionReq, Dict[str, Any]]) -> Any:
+        d = _to_dict(req)
+        params = {k: v for k, v in d.items() if v not in (None, "", 0)}
         resp = self._http_get(C.GET_HISTORY_ORDER_FILL_TRANSACTION_PATH, params)
         if resp.get("code") != "0":
             raise RuntimeError(f"get history order fill transaction failed: {resp.get('msg')}")
         return resp
 
-    def get_history_position_term(self, req: Dict[str, Any]) -> Any:
-        params = {k: v for k, v in req.items() if v not in (None, "", 0)}
+    def get_history_position_term(self, req: Union[GetHistoryPositionTermReq, Dict[str, Any]]) -> Any:
+        d = _to_dict(req)
+        params = {k: v for k, v in d.items() if v not in (None, "", 0)}
         resp = self._http_get(C.GET_HISTORY_POSITION_TERM_PATH, params)
         if resp.get("code") != "0":
             raise RuntimeError(f"get history position term failed: {resp.get('msg')}")
@@ -278,7 +382,16 @@ class AntxClient:
         return parse_wrapped_first(data, "price")
 
     # --------------- Transactions ---------------
-    def _sign_and_send_tx(self, type_url: str, msg, unordered: bool) -> str:
+    def _sign_and_send_tx(
+        self,
+        type_url: str,
+        msg,
+        unordered: bool,
+        *,
+        wait_for_confirmation: bool = False,
+        wait_timeout: float = 30.0,
+        wait_interval: float = 1.0,
+    ) -> str:
         if agent_tx is None or order_tx is None:
             raise RuntimeError("protobuf modules not available; generate python/antx_proto first")
         if not self._agent_priv_bytes or not self._agent_pubkey_bytes:
@@ -289,7 +402,7 @@ class AntxClient:
         if self._account_number is None:
             acc, _ = self._get_account_number_and_sequence(self._agent_address_bech32)
             self._account_number = acc
-        
+
         if unordered:
             sequence = 0
             timeout_timestamp_ns = int((time.time() + 10) * 1_000_000_000)
@@ -297,13 +410,13 @@ class AntxClient:
             _, seq = self._get_account_number_and_sequence(self._agent_address_bech32)
             sequence = seq
             timeout_timestamp_ns = 0
-        
+
         account_number = self._account_number
 
         any_msg = pack_any(msg, type_url)
         body = build_tx_body([any_msg], unordered=unordered, timeout_timestamp_ns=timeout_timestamp_ns)
         auth = build_auth_info(self._agent_pubkey_bytes, sequence, gas_limit=200000, fee_amounts=[])
-        
+
         tx_bytes = sign_tx(body, auth, self._chain_id, account_number, Signer(
             private_key_bytes=self._agent_priv_bytes,
             public_key_bytes=self._agent_pubkey_bytes,
@@ -315,19 +428,97 @@ class AntxClient:
             "rawTx": raw_b64,
             "accountNumber": int(account_number),
         }
-        
+
         resp = self._http_post(C.SEND_TRANSACTION_PATH, req)
         if resp.get("code") != "0":
             raise RuntimeError(f"failed to send transaction: {resp.get('msg')}")
         data = resp.get("data", {})
         tx_hash = data.get("txHash") or data.get("hash") or data.get("txId") or ""
+
+        if wait_for_confirmation and tx_hash:
+            self.wait_for_tx(tx_hash, timeout=wait_timeout, poll_interval=wait_interval)
         return tx_hash
+
+    def get_transaction_detail(self, tx_hash: str) -> ChainTransactionDetail:
+        """Fetch the on-chain detail for a transaction hash.
+
+        Returns a :class:`ChainTransactionDetail`. ``block == 0`` indicates
+        the tx has not been included yet (still pending). Raises
+        ``RuntimeError`` if the gateway returned an explicit error code.
+        """
+        if not tx_hash:
+            raise ValueError("tx_hash is required")
+        path = f"{C.GET_TRANSACTION_PATH}/{tx_hash}"
+        resp = self._http_get(path, {})
+        # The /explorer/tx/:hash endpoint historically returns code="" on
+        # success rather than "0"; accept both. Only treat the response as
+        # a failure when code is set to something other than "" / "0".
+        code = resp.get("code")
+        if code not in ("", "0", None):
+            raise RuntimeError(f"get transaction detail failed: {resp.get('msg')}")
+        d = resp.get("data") or {}
+        return ChainTransactionDetail(
+            rawTx=d.get("rawTx", ""),
+            block=int(d.get("block", 0) or 0),
+            hash=d.get("hash", "") or tx_hash,
+            fromAddress=d.get("from", "") or "",
+            status=bool(d.get("status", False)),
+            error=d.get("error"),
+            errorCode=int(d.get("errorCode", 0) or 0),
+            actionList=d.get("action") or [],
+            resultData=d.get("resultData", "") or "",
+        )
+
+    def wait_for_tx(
+        self,
+        tx_hash: str,
+        *,
+        timeout: float = 30.0,
+        poll_interval: float = 1.0,
+    ) -> ChainTransactionDetail:
+        """Poll the explorer endpoint until the tx is included on chain.
+
+        - Returns the :class:`ChainTransactionDetail` once ``block > 0`` and
+          ``status == True``.
+        - Raises :class:`TxFailedError` if the tx is included but
+          ``status == False`` (execution rejected on chain).
+        - Raises :class:`TxPendingTimeoutError` if the tx is still pending
+          (``block == 0``) after ``timeout`` seconds.
+
+        ``poll_interval`` is the gap between successive polls.
+        """
+        if not tx_hash:
+            raise ValueError("tx_hash is required")
+        deadline = time.monotonic() + max(0.0, timeout)
+        last: Optional[ChainTransactionDetail] = None
+        while True:
+            try:
+                last = self.get_transaction_detail(tx_hash)
+            except Exception:
+                # Transient lookup failure (e.g. tx not yet indexed) — retry.
+                last = None
+            if last is not None and last.block > 0:
+                if last.status:
+                    return last
+                raise TxFailedError(last)
+            if time.monotonic() >= deadline:
+                raise TxPendingTimeoutError(tx_hash, timeout)
+            time.sleep(poll_interval)
 
     def set_agent_address(self, bech32_address: str) -> None:
         self._agent_address_bech32 = bech32_address
 
     # Bind agent
-    def bind_agent(self, eth_private_key_hex: str, chain_id: str, expire_seconds: int) -> str:
+    def bind_agent(
+        self,
+        eth_private_key_hex: str,
+        chain_id: str,
+        expire_seconds: int,
+        *,
+        wait_for_confirmation: bool = False,
+        wait_timeout: float = 30.0,
+        wait_interval: float = 1.0,
+    ) -> str:
         if agent_tx is None:
             raise RuntimeError("protobuf modules not available; generate python/antx_proto first")
         if not self._agent_address_bech32:
@@ -353,12 +544,27 @@ class AntxClient:
             expire_time=expire_ms,
             chain_signature=signature,
         )
-        return self._sign_and_send_tx(C.MSG_BIND_AGENT_TYPE_URL, msg, unordered=False)
+        return self._sign_and_send_tx(
+            C.MSG_BIND_AGENT_TYPE_URL,
+            msg,
+            unordered=False,
+            wait_for_confirmation=wait_for_confirmation,
+            wait_timeout=wait_timeout,
+            wait_interval=wait_interval,
+        )
 
     # Orders
-    def create_order(self, params: Dict[str, Any]) -> str:
+    def create_order(
+        self,
+        params: Union[CreateOrderParam, Dict[str, Any]],
+        *,
+        wait_for_confirmation: bool = False,
+        wait_timeout: float = 30.0,
+        wait_interval: float = 1.0,
+    ) -> str:
         if order_tx is None:
             raise RuntimeError("protobuf modules not available; generate python/antx_proto first")
+        params = _to_dict(params)
         msg = order_tx.MsgCreateOrder(
             agent_address=self._agent_address_bech32,
             subaccount_id=params["subaccountId"],
@@ -385,13 +591,30 @@ class AntxClient:
             is_set_open_sl=params.get("isSetOpenSl", False),
             open_sl_param=params.get("openSlParam"),
         )
-        return self._sign_and_send_tx(C.MSG_CREATE_ORDER_TYPE_URL, msg, unordered=True)
+        return self._sign_and_send_tx(
+            C.MSG_CREATE_ORDER_TYPE_URL,
+            msg,
+            unordered=True,
+            wait_for_confirmation=wait_for_confirmation,
+            wait_timeout=wait_timeout,
+            wait_interval=wait_interval,
+        )
 
-    def create_order_batch(self, params: Dict[str, Any]) -> str:
+    def create_order_batch(
+        self,
+        params: Union[CreateOrderBatchParam, Dict[str, Any]],
+        *,
+        wait_for_confirmation: bool = False,
+        wait_timeout: float = 30.0,
+        wait_interval: float = 1.0,
+    ) -> str:
         if order_tx is None:
             raise RuntimeError("protobuf modules not available; generate python/antx_proto first")
+        params = _to_dict(params)
         batch_list = []
         for o in params.get("createOrderParam", []):
+            if is_dataclass(o) and not isinstance(o, type):
+                o = asdict(o)
             # Convert camelCase to snake_case for protobuf
             batch_order = order_tx.CreateOrderParam(
                 is_buy=o.get("isBuy", False),
@@ -423,46 +646,113 @@ class AntxClient:
             leverage=params.get("leverage", 1),
             create_order_param=batch_list,
         )
-        return self._sign_and_send_tx(C.MSG_CREATE_ORDER_BATCH_TYPE_URL, msg, unordered=True)
+        return self._sign_and_send_tx(
+            C.MSG_CREATE_ORDER_BATCH_TYPE_URL,
+            msg,
+            unordered=True,
+            wait_for_confirmation=wait_for_confirmation,
+            wait_timeout=wait_timeout,
+            wait_interval=wait_interval,
+        )
 
-    def cancel_order(self, params: Dict[str, Any]) -> str:
+    def cancel_order(
+        self,
+        params: Union[CancelOrderParam, Dict[str, Any]],
+        *,
+        wait_for_confirmation: bool = False,
+        wait_timeout: float = 30.0,
+        wait_interval: float = 1.0,
+    ) -> str:
         if order_tx is None:
             raise RuntimeError("protobuf modules not available; generate python/antx_proto first")
+        params = _to_dict(params)
         msg = order_tx.MsgCancelOrder(
             agent_address=self._agent_address_bech32,
             subaccount_id=params["subaccountId"],
             order_id=params.get("orderIdList", []),
         )
-        return self._sign_and_send_tx(C.MSG_CANCEL_ORDER_TYPE_URL, msg, unordered=True)
+        return self._sign_and_send_tx(
+            C.MSG_CANCEL_ORDER_TYPE_URL,
+            msg,
+            unordered=True,
+            wait_for_confirmation=wait_for_confirmation,
+            wait_timeout=wait_timeout,
+            wait_interval=wait_interval,
+        )
 
-    def cancel_order_by_client_id(self, params: Dict[str, Any]) -> str:
+    def cancel_order_by_client_id(
+        self,
+        params: Union[CancelOrderByClientIdParam, Dict[str, Any]],
+        *,
+        wait_for_confirmation: bool = False,
+        wait_timeout: float = 30.0,
+        wait_interval: float = 1.0,
+    ) -> str:
         if order_tx is None:
             raise RuntimeError("protobuf modules not available; generate python/antx_proto first")
+        params = _to_dict(params)
         msg = order_tx.MsgCancelOrderByClientId(
             agent_address=self._agent_address_bech32,
             subaccount_id=params["subaccountId"],
             client_order_id=params.get("clientOrderIdList", []),
         )
-        return self._sign_and_send_tx(C.MSG_CANCEL_ORDER_BY_CLIENT_ID_TYPE_URL, msg, unordered=True)
+        return self._sign_and_send_tx(
+            C.MSG_CANCEL_ORDER_BY_CLIENT_ID_TYPE_URL,
+            msg,
+            unordered=True,
+            wait_for_confirmation=wait_for_confirmation,
+            wait_timeout=wait_timeout,
+            wait_interval=wait_interval,
+        )
 
-    def cancel_all_order(self, params: Dict[str, Any]) -> str:
+    def cancel_all_order(
+        self,
+        params: Union[CancelAllOrderParam, Dict[str, Any]],
+        *,
+        wait_for_confirmation: bool = False,
+        wait_timeout: float = 30.0,
+        wait_interval: float = 1.0,
+    ) -> str:
         if order_tx is None:
             raise RuntimeError("protobuf modules not available; generate python/antx_proto first")
+        params = _to_dict(params)
         msg = order_tx.MsgCancelAllOrder(
             agent_address=self._agent_address_bech32,
             subaccount_id=params["subaccountId"],
             filter_exchange_id=params.get("filterExchangeIdList", []),
         )
-        return self._sign_and_send_tx(C.MSG_CANCEL_ALL_ORDER_TYPE_URL, msg, unordered=True)
+        return self._sign_and_send_tx(
+            C.MSG_CANCEL_ALL_ORDER_TYPE_URL,
+            msg,
+            unordered=True,
+            wait_for_confirmation=wait_for_confirmation,
+            wait_timeout=wait_timeout,
+            wait_interval=wait_interval,
+        )
 
-    def close_all_position(self, params: Dict[str, Any]) -> str:
+    def close_all_position(
+        self,
+        params: Union[CloseAllPositionParam, Dict[str, Any]],
+        *,
+        wait_for_confirmation: bool = False,
+        wait_timeout: float = 30.0,
+        wait_interval: float = 1.0,
+    ) -> str:
         if order_tx is None:
             raise RuntimeError("protobuf modules not available; generate python/antx_proto first")
+        params = _to_dict(params)
         msg = order_tx.MsgCloseAllPosition(
             agent_address=self._agent_address_bech32,
             subaccount_id=params["subaccountId"],
             filter_exchange_id=params.get("filterExchangeIdList", []),
         )
-        return self._sign_and_send_tx(C.MSG_CLOSE_ALL_POSITION_TYPE_URL, msg, unordered=True)
+        return self._sign_and_send_tx(
+            C.MSG_CLOSE_ALL_POSITION_TYPE_URL,
+            msg,
+            unordered=True,
+            wait_for_confirmation=wait_for_confirmation,
+            wait_timeout=wait_timeout,
+            wait_interval=wait_interval,
+        )
 
 

@@ -1,18 +1,6 @@
 #!/usr/bin/env python3
 """
-Complete example for Antx SDK Python (typed-request edition)
-
-Same flow as complete_example_old.py, but every request is built from a
-dataclass exported by `antx_sdk.types` instead of a raw dict. Benefits:
-
-- IDE autocompletion / type checking on every field
-- Misspelled fields surface at edit time, not via "missing required field"
-  errors at runtime
-- Field set is the same one defined in antx-api-gateway/api/*.api, so the
-  dataclass is the contract
-
-Both styles still work — the SDK accepts `Union[XxxParam, Dict[str, Any]]`,
-so existing dict-based code does not need to change.
+Complete example for Antx SDK Python
 
 This example demonstrates:
 1. Basic functions (coin list, exchange list)
@@ -20,40 +8,25 @@ This example demonstrates:
 3. WebSocket real-time data
 4. Trading functions (bind agent, create limit/market orders, cancel orders, batch orders)
 5. Trading queries (active orders, history orders, account assets, position/collateral transactions, snapshots, etc.)
+
+This example matches the Go SDK's complete_example.go functionality.
 """
 
 import os
 import sys
 import time
+from typing import Optional
 
 # Add parent directory to path to import antx_sdk
 script_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(script_dir)
 sys.path.insert(0, parent_dir)
 
-from antx_sdk.client import AntxClient, TxFailedError, TxPendingTimeoutError
-from antx_sdk.constants import ACCOUNT_HRP
-from antx_sdk.enums import (
-    KLineType,
-    MarginMode,
-    MarketPriceType,
-    TimeInForce,
-)
-from antx_sdk.types import (
-    CancelOrderParam,
-    CreateOrderBatchDetail,
-    CreateOrderBatchParam,
-    CreateOrderParam,
-    GetActiveOrderReq,
-    GetAssetSnapshotReq,
-    GetCollateralTransactionReq,
-    GetFundingHistoryReq,
-    GetHistoryOrderFillTransactionReq,
-    GetHistoryOrderReq,
-    GetHistoryPositionTermReq,
-    GetKLineReq,
-    GetPerpetualAccountAssetReq,
-    GetPositionTransactionReq,
+from antx_sdk.client import AntxClient
+from antx_sdk.constants import (
+    ACCOUNT_HRP,
+    KLINE_TYPE_MINUTE_1,
+    PRICE_TYPE_LAST,
 )
 
 
@@ -123,12 +96,12 @@ def demo_market_data(client: AntxClient):
 
     print("\n2.1 Getting kline data:")
     try:
-        kline_req = GetKLineReq(
-            exchangeId=DEFAULT_EXCHANGE_ID,
-            klineType=KLineType.MINUTE_1,
-            priceType=MarketPriceType.LAST,
-            size=10,
-        )
+        kline_req = {
+            "exchangeId": DEFAULT_EXCHANGE_ID,
+            "klineType": KLINE_TYPE_MINUTE_1,
+            "priceType": PRICE_TYPE_LAST,
+            "size": 10,
+        }
         kline_resp = client.get_kline(kline_req)
         kline_list = kline_resp.get("data", {}).get("klineList", [])
         print(f"✓ Retrieved {len(kline_list)} kline records")
@@ -143,10 +116,10 @@ def demo_market_data(client: AntxClient):
 
     print("\n2.2 Getting funding history:")
     try:
-        funding_req = GetFundingHistoryReq(
-            exchangeId=DEFAULT_EXCHANGE_ID,
-            size=5,
-        )
+        funding_req = {
+            "exchangeId": DEFAULT_EXCHANGE_ID,
+            "size": 5,
+        }
         funding_resp = client.get_funding_history(funding_req)
         funding_list = funding_resp.get("data", {}).get("fundingRateList", [])
         print(f"✓ Retrieved {len(funding_list)} funding rate records")
@@ -244,69 +217,69 @@ def demo_trading_functions(client: AntxClient):
                 test_subaccount_id = sub_list[0].get("id", "")
                 print(f"✓ Found subaccount: {test_subaccount_id}")
 
-                # Convert subaccount ID to int (proto fields are uint64)
+                # Convert subaccount ID to int
                 test_subaccount_id_int = int(test_subaccount_id)
                 exchange_id_int = int(DEFAULT_EXCHANGE_ID)
 
-                print("\n4.3 Creating limit buy order (wait_for_confirmation=True)...")
-                # Demo: wait_for_confirmation=True — the SDK polls the
-                # explorer endpoint until the tx is included on chain. The
-                # call returns the tx hash on success, or raises:
-                #   TxFailedError         — included but execution rejected
-                #   TxPendingTimeoutError — still pending after wait_timeout
+                print("\n4.3 Creating limit buy order...")
                 try:
-                    create_order_req = CreateOrderParam(
-                        subaccountId=test_subaccount_id_int,
-                        exchangeId=exchange_id_int,
-                        marginMode=MarginMode.CROSS,
-                        leverage=20,                           # Match the subaccount's existing leverage
-                        isBuy=True,
-                        priceScale=2,
-                        priceValue=100000,                     # Price 1000.00
-                        sizeScale=3,
-                        sizeValue=100,                         # Size 0.100
-                        clientOrderId="py-test-001",
-                        timeInForce=TimeInForce.GOOD_TIL_CANCEL,
-                        expireTime=int((time.time() + 86400) * 1_000),
-                    )
-                    order_tx_hash = client.create_order(
-                        create_order_req,
-                        wait_for_confirmation=True,
-                        wait_timeout=20,
-                        wait_interval=1.0,
-                    )
-                    print(f"✓ Create order confirmed on chain, tx_hash: {order_tx_hash}")
-
-                    # Once a hash is known, you can also re-query the
-                    # explorer at any time:
-                    detail = client.get_transaction_detail(order_tx_hash)
-                    print(f"  block={detail.block} status={detail.status} errorCode={detail.errorCode}")
-                except TxFailedError as e:
-                    print(f"⚠ Create order rejected on chain: tx={e.tx_hash} "
-                          f"errorCode={e.error_code} error={e.error!r}")
-                except TxPendingTimeoutError as e:
-                    print(f"⚠ Create order still pending after {e.timeout}s: tx={e.tx_hash}")
-                    print("  You can keep polling with client.wait_for_tx(tx_hash, timeout=...)")
+                    create_order_req = {
+                        "subaccountId": test_subaccount_id_int,
+                        "exchangeId": exchange_id_int,
+                        "marginMode": 1,  # Full margin
+                        "leverage": 1,
+                        "isBuy": True,
+                        "priceScale": 2,
+                        "priceValue": 100000,  # Price 1000.00
+                        "sizeScale": 3,
+                        "sizeValue": 100,  # Size 0.100
+                        "clientOrderId": "py-test-001",
+                        "timeInForce": 1,  # GTC
+                        "reduceOnly": False,
+                        "expireTime": int((time.time() + 86400) * 1_000),  # 24 hours (milliseconds)
+                        "isMarket": False,
+                        "isPositionTp": False,
+                        "isPositionSl": False,
+                        "triggerType": 0,
+                        "triggerPriceType": 0,
+                        "triggerPriceValue": 0,
+                        "isSetOpenTp": False,
+                        "isSetOpenSl": False,
+                    }
+                    order_tx_hash = client.create_order(create_order_req)
+                    print(f"✓ Create order successful, tx_hash: {order_tx_hash}")
+                    # Wait for transaction confirmation
+                    if order_tx_hash:
+                        print("Waiting for transaction confirmation...")
+                        time.sleep(3)
                 except Exception as e:
                     print(f"⚠ Create order failed: {e}")
 
                 print("\n4.4 Creating market sell order...")
                 try:
-                    market_order_req = CreateOrderParam(
-                        subaccountId=test_subaccount_id_int,
-                        exchangeId=exchange_id_int,
-                        marginMode=MarginMode.CROSS,
-                        leverage=20,                           # Match the subaccount's existing leverage
-                        isBuy=False,
-                        priceScale=2,
-                        priceValue=0,                          # Market order: price 0
-                        sizeScale=3,
-                        sizeValue=50,                          # Size 0.050
-                        clientOrderId="py-market-001",
-                        timeInForce=TimeInForce.IMMEDIATE_OR_CANCEL,
-                        expireTime=int((time.time() + 86400) * 1_000),
-                        isMarket=True,
-                    )
+                    market_order_req = {
+                        "subaccountId": test_subaccount_id_int,
+                        "exchangeId": exchange_id_int,
+                        "marginMode": 1,  # Full margin
+                        "leverage": 1,
+                        "isBuy": False,
+                        "priceScale": 2,
+                        "priceValue": 0,  # Market order price is 0
+                        "sizeScale": 3,
+                        "sizeValue": 50,  # Size 0.050
+                        "clientOrderId": "py-market-001",
+                        "timeInForce": 3,  # IOC (more suitable for market orders)
+                        "reduceOnly": False,
+                        "expireTime": int((time.time() + 86400) * 1_000),  # 24 hours (milliseconds)
+                        "isMarket": True,  # Market order
+                        "isPositionTp": False,
+                        "isPositionSl": False,
+                        "triggerType": 0,
+                        "triggerPriceType": 0,
+                        "triggerPriceValue": 0,
+                        "isSetOpenTp": False,
+                        "isSetOpenSl": False,
+                    }
                     market_order_tx_hash = client.create_order(market_order_req)
                     print(f"✓ Create market order successful, tx_hash: {market_order_tx_hash}")
                 except Exception as e:
@@ -314,11 +287,13 @@ def demo_trading_functions(client: AntxClient):
 
                 print("\n4.5 Canceling order...")
                 try:
-                    sample_order_id = "188531408901"  # Replace with a real order id from 5.1
-                    cancel_order_req = CancelOrderParam(
-                        subaccountId=test_subaccount_id_int,
-                        orderIdList=[int(sample_order_id)],
-                    )
+                    # Use a sample order ID (replace with actual order ID from previous steps)
+                    # For demo purposes, using a placeholder - in real usage, get from active orders
+                    sample_order_id = "188531408901"  # Example order ID
+                    cancel_order_req = {
+                        "subaccountId": test_subaccount_id_int,
+                        "orderIdList": [int(sample_order_id)],
+                    }
                     cancel_tx_hash = client.cancel_order(cancel_order_req)
                     print(f"✓ Cancel order successful, tx_hash: {cancel_tx_hash}")
                 except Exception as e:
@@ -326,34 +301,53 @@ def demo_trading_functions(client: AntxClient):
 
                 print("\n4.6 Creating batch orders...")
                 try:
-                    batch_order_req = CreateOrderBatchParam(
-                        subaccountId=test_subaccount_id_int,
-                        exchangeId=exchange_id_int,
-                        marginMode=MarginMode.CROSS,
-                        leverage=20,                           # Match the subaccount's existing leverage
-                        createOrderParam=[
-                            CreateOrderBatchDetail(
-                                isBuy=True,
-                                priceScale=2,
-                                priceValue=95000,              # Price 950.00
-                                sizeScale=3,
-                                sizeValue=200,                 # Size 0.200
-                                clientOrderId="batch-order-001",
-                                timeInForce=TimeInForce.GOOD_TIL_CANCEL,
-                                expireTime=int((time.time() + 86400) * 1_000),
-                            ),
-                            CreateOrderBatchDetail(
-                                isBuy=False,
-                                priceScale=2,
-                                priceValue=105000,             # Price 1050.00
-                                sizeScale=3,
-                                sizeValue=150,                 # Size 0.150
-                                clientOrderId="batch-order-002",
-                                timeInForce=TimeInForce.GOOD_TIL_CANCEL,
-                                expireTime=int((time.time() + 86400) * 1_000),
-                            ),
+                    batch_order_req = {
+                        "agentAddress": agent_addr,
+                        "subaccountId": test_subaccount_id_int,
+                        "exchangeId": exchange_id_int,
+                        "marginMode": 1,
+                        "leverage": 1,
+                        "createOrderParam": [
+                            {
+                                "isBuy": True,
+                                "priceScale": 2,
+                                "priceValue": 95000,  # Price 950.00
+                                "sizeScale": 3,
+                                "sizeValue": 200,  # Size 0.200
+                                "clientOrderId": "batch-order-001",
+                                "timeInForce": 1,
+                                "reduceOnly": False,
+                                "expireTime": int((time.time() + 86400) * 1_000),  # 24 hours (milliseconds)
+                                "isMarket": False,
+                                "isPositionTp": False,
+                                "isPositionSl": False,
+                                "triggerType": 0,
+                                "triggerPriceType": 0,
+                                "triggerPriceValue": 0,
+                                "isSetOpenTp": False,
+                                "isSetOpenSl": False,
+                            },
+                            {
+                                "isBuy": False,
+                                "priceScale": 2,
+                                "priceValue": 105000,  # Price 1050.00
+                                "sizeScale": 3,
+                                "sizeValue": 150,  # Size 0.150
+                                "clientOrderId": "batch-order-002",
+                                "timeInForce": 1,
+                                "reduceOnly": False,
+                                "expireTime": int((time.time() + 86400) * 1_000),  # 24 hours (milliseconds)
+                                "isMarket": False,
+                                "isPositionTp": False,
+                                "isPositionSl": False,
+                                "triggerType": 0,
+                                "triggerPriceType": 0,
+                                "triggerPriceValue": 0,
+                                "isSetOpenTp": False,
+                                "isSetOpenSl": False,
+                            },
                         ],
-                    )
+                    }
                     batch_tx_hash = client.create_order_batch(batch_order_req)
                     print(f"✓ Create batch orders successful, tx_hash: {batch_tx_hash}")
                 except Exception as e:
@@ -385,6 +379,7 @@ def demo_trading_queries(client: AntxClient):
         try:
             from eth_account import Account
             from antx_sdk.crypto import convert_to_eth_addr
+            # Use ETH_PRIVATE_KEY to get ETH address (same as demo_trading_functions)
             eth_addr = Account.from_key(bytes.fromhex(ETH_PRIVATE_KEY.replace("0x", ""))).address
             eth_addr_checksum = convert_to_eth_addr(eth_addr)
             sub_list = client.get_subaccount_list(chain_type=1, chain_address=eth_addr_checksum, agent_address=agent_addr)
@@ -396,24 +391,23 @@ def demo_trading_queries(client: AntxClient):
             print(f"⚠ Failed to get subaccount: {e}")
             return
 
+        # Get active orders (skip if no valid subaccount)
+        print("\n5.1 Getting active orders...")
         if test_subaccount_id == "":
             print("⚠ No valid subaccount, skipping 5.1 ~ 5.8 trading queries demo")
             return
-
-        # 5.1 Active orders
-        print("\n5.1 Getting active orders...")
         try:
-            active_order_req = GetActiveOrderReq(
-                subaccountId=test_subaccount_id,
-                size=10,
-            )
+            active_order_req = {
+                "subaccountId": test_subaccount_id,
+                "size": 10,
+            }
             active_order_resp = client.get_active_order(active_order_req)
             order_list = active_order_resp.get("data", {}).get("orderList", [])
-            if not order_list:
+            if len(order_list) == 0:
                 print("⚠ No active orders found")
             else:
                 print(f"✓ Retrieved {len(order_list)} active orders")
-                for i, order in enumerate(order_list[:3]):
+                for i, order in enumerate(order_list[:3]):  # Show first 3
                     print(f"  Order {i+1}: ID={order.get('id', 'N/A')}, ExchangeId={order.get('exchangeId', 'N/A')}, "
                           f"Direction={'Buy' if order.get('isBuy') else 'Sell'}, "
                           f"Price={order.get('price', 'N/A')}, Size={order.get('size', 'N/A')}, "
@@ -421,17 +415,17 @@ def demo_trading_queries(client: AntxClient):
         except Exception as e:
             print(f"⚠ Failed to get active orders: {e}")
 
-        # 5.2 History orders
+        # Get history orders
         print("\n5.2 Getting history orders...")
         try:
-            history_order_req = GetHistoryOrderReq(
-                subaccountId=test_subaccount_id,
-                size=10,
-            )
+            history_order_req = {
+                "subaccountId": test_subaccount_id,
+                "size": 10,
+            }
             history_order_resp = client.get_history_order(history_order_req)
             history_order_list = history_order_resp.get("data", {}).get("orderList", [])
             print(f"✓ Retrieved {len(history_order_list)} history orders")
-            for i, order in enumerate(history_order_list[:3]):
+            for i, order in enumerate(history_order_list[:3]):  # Show first 3
                 print(f"  History Order {i+1}: ID={order.get('id', 'N/A')}, ExchangeId={order.get('exchangeId', 'N/A')}, "
                       f"Direction={'Buy' if order.get('isBuy') else 'Sell'}, "
                       f"Price={order.get('price', 'N/A')}, Size={order.get('size', 'N/A')}, "
@@ -439,21 +433,21 @@ def demo_trading_queries(client: AntxClient):
         except Exception as e:
             print(f"⚠ Failed to get history orders: {e}")
 
-        # 5.3 Perpetual account asset
+        # Get perpetual account asset
         print("\n5.3 Getting perpetual account asset...")
         try:
-            asset_req = GetPerpetualAccountAssetReq(
-                subaccountId=test_subaccount_id,
-            )
+            asset_req = {
+                "subaccountId": test_subaccount_id,
+            }
             asset_resp = client.get_perpetual_account_asset(asset_req)
             data = asset_resp.get("data", {})
             collateral_list = data.get("collateralList", [])
             position_list = data.get("positionList", [])
             print(f"✓ Retrieved {len(collateral_list)} collaterals, {len(position_list)} positions")
-            for i, collateral in enumerate(collateral_list[:3]):
+            for i, collateral in enumerate(collateral_list[:3]):  # Show first 3
                 print(f"  Collateral {i+1}: CoinId={collateral.get('coinId', 'N/A')}, "
                       f"Amount={collateral.get('amount', 'N/A')}")
-            for i, position in enumerate(position_list[:3]):
+            for i, position in enumerate(position_list[:3]):  # Show first 3
                 print(f"  Position {i+1}: ExchangeId={position.get('exchangeId', 'N/A')}, "
                       f"OpenSize={position.get('openSize', 'N/A')}, "
                       f"OpenValue={position.get('openValue', 'N/A')}, "
@@ -461,55 +455,65 @@ def demo_trading_queries(client: AntxClient):
         except Exception as e:
             print(f"⚠ Failed to get account asset: {e}")
 
-        # 5.4 Position transaction
+        # Get position transaction
         print("\n5.4 Getting position transaction...")
         try:
-            position_req = GetPositionTransactionReq(
-                subaccountId=test_subaccount_id,
-                size=10,
-            )
+            position_req = {
+                "subaccountId": test_subaccount_id,
+                "size": 10,
+            }
             position_resp = client.get_position_transaction(position_req)
             position_tx_list = position_resp.get("data", {}).get("positionTransactionList", [])
             print(f"✓ Retrieved {len(position_tx_list)} position transactions")
-            for i, tx in enumerate(position_tx_list[:3]):
-                delta_open_size = tx.get("deltaOpenSize") or "0"
-                delta_open_value = tx.get("deltaOpenValue") or "0"
-                fill_size = tx.get("fillSize") or "0"
-                fill_value = tx.get("fillValue") or "0"
+            for i, tx in enumerate(position_tx_list[:3]):  # Show first 3
+                delta_open_size = tx.get("deltaOpenSize", "0")
+                if delta_open_size == "":
+                    delta_open_size = "0"
+                delta_open_value = tx.get("deltaOpenValue", "0")
+                if delta_open_value == "":
+                    delta_open_value = "0"
+                fill_size = tx.get("fillSize", "0")
+                if fill_size == "":
+                    fill_size = "0"
+                fill_value = tx.get("fillValue", "0")
+                if fill_value == "":
+                    fill_value = "0"
                 print(f"  Position Transaction {i+1}: ExchangeId={tx.get('exchangeId', 'N/A')}, "
                       f"DeltaOpenSize={delta_open_size}, DeltaOpenValue={delta_open_value}, "
                       f"FillSize={fill_size}, FillValue={fill_value}")
         except Exception as e:
             print(f"⚠ Failed to get position transaction: {e}")
 
-        # 5.5 Collateral transaction
+        # Get collateral transaction
         print("\n5.5 Getting collateral transaction...")
         try:
-            collateral_req = GetCollateralTransactionReq(
-                subaccountId=test_subaccount_id,
-                size=10,
-            )
+            collateral_req = {
+                "subaccountId": test_subaccount_id,
+                "size": 10,
+            }
             collateral_resp = client.get_collateral_transaction(collateral_req)
             collateral_tx_list = collateral_resp.get("data", {}).get("collateralTransactionList", [])
             print(f"✓ Retrieved {len(collateral_tx_list)} collateral transactions")
-            for i, tx in enumerate(collateral_tx_list[:3]):
-                delta_amount = tx.get("deltaAmount") or "0"
+            for i, tx in enumerate(collateral_tx_list[:3]):  # Show first 3
+                delta_amount = tx.get("deltaAmount", "0")
+                if delta_amount == "":
+                    delta_amount = "0"
                 print(f"  Collateral Transaction {i+1}: CoinId={tx.get('coinId', 'N/A')}, "
                       f"DeltaAmount={delta_amount}, Type={tx.get('type', 'N/A')}")
         except Exception as e:
             print(f"⚠ Failed to get collateral transaction: {e}")
 
-        # 5.6 Asset snapshot
+        # Get asset snapshot
         print("\n5.6 Getting asset snapshot...")
         try:
-            snapshot_req = GetAssetSnapshotReq(
-                subaccountId=test_subaccount_id,
-                size=10,
-            )
+            snapshot_req = {
+                "subaccountId": test_subaccount_id,
+                "size": 10,
+            }
             snapshot_resp = client.get_asset_snapshot(snapshot_req)
             snapshot_list = snapshot_resp.get("data", {}).get("assetSnapshotList", [])
             print(f"✓ Retrieved {len(snapshot_list)} asset snapshots")
-            for i, snapshot in enumerate(snapshot_list[:3]):
+            for i, snapshot in enumerate(snapshot_list[:3]):  # Show first 3
                 print(f"  Asset Snapshot {i+1}: CoinId={snapshot.get('coinId', 'N/A')}, "
                       f"TotalEquity={snapshot.get('totalEquity', 'N/A')}, "
                       f"TotalRealizePnl={snapshot.get('totalRealizePnl', 'N/A')}, "
@@ -517,32 +521,32 @@ def demo_trading_queries(client: AntxClient):
         except Exception as e:
             print(f"⚠ Failed to get asset snapshot: {e}")
 
-        # 5.7 History order fill transaction
+        # Get history order fill transaction
         print("\n5.7 Getting history order fill transaction...")
         try:
-            fill_req = GetHistoryOrderFillTransactionReq(
-                subaccountId=test_subaccount_id,
-                size=10,
-            )
+            fill_req = {
+                "subaccountId": test_subaccount_id,
+                "size": 10,
+            }
             fill_resp = client.get_history_order_fill_transaction(fill_req)
             fill_tx_list = fill_resp.get("data", {}).get("orderFillTransactionList", [])
             print(f"✓ Retrieved {len(fill_tx_list)} order fill transactions")
-            for i, fill in enumerate(fill_tx_list[:3]):
+            for i, fill in enumerate(fill_tx_list[:3]):  # Show first 3
                 print(f"  Order Fill Transaction {i+1}: {fill}")
         except Exception as e:
             print(f"⚠ Failed to get history order fill transaction: {e}")
 
-        # 5.8 History position term
+        # Get history position term
         print("\n5.8 Getting history position term...")
         try:
-            term_req = GetHistoryPositionTermReq(
-                subaccountId=test_subaccount_id,
-                size=10,
-            )
+            term_req = {
+                "subaccountId": test_subaccount_id,
+                "size": 10,
+            }
             term_resp = client.get_history_position_term(term_req)
             term_list = term_resp.get("data", {}).get("positionTermList", [])
             print(f"✓ Retrieved {len(term_list)} position terms")
-            for i, term in enumerate(term_list[:3]):
+            for i, term in enumerate(term_list[:3]):  # Show first 3
                 print(f"  Position Term {i+1}: ExchangeId={term.get('exchangeId', 'N/A')}, "
                       f"TermCount={term.get('termCount', 'N/A')}, "
                       f"CumOpenSize={term.get('cumOpenSize', 'N/A')}, "
@@ -557,13 +561,14 @@ def demo_trading_queries(client: AntxClient):
 def main():
     """Run all demos"""
     print("=" * 60)
-    print("Antx SDK Python - Complete Example (typed-request edition)")
+    print("Antx SDK Python - Complete Example")
     print("=" * 60)
     print(f"Gateway: {GATEWAY_URL}")
     print(f"Chain ID: {CHAIN_ID}")
 
     client = AntxClient(base_url=GATEWAY_URL, ws_url=WS_URL)
 
+    # Run demos
     demo_basic_functions(client)
     demo_market_data(client)
     demo_websocket_realtime(client)

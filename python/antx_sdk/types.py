@@ -1,5 +1,38 @@
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
+
+from .enums import (
+    AssetSnapshotTimeTag,
+    KLineType,
+    MarginMode,
+    MarketPriceType,
+    OrderCancelReason,
+    OrderStatus,
+    PriceType,
+    TimeInForce,
+    TriggerType,
+)
+
+# Enum-valued fields below are typed as `Union[<Enum>, int]` (or
+# `Union[<StrEnum>, str]`) so callers may pass either an enum member or a
+# raw int/str. See `antx_sdk.enums` for the full value tables and the
+# authoritative .proto / .api sources.
+#
+# Filter list fields (filter*List) are HTTP query strings. Multiple values
+# are comma-joined; build them with `enums.filter_int_list([...])` or
+# `enums.filter_bool_list([...])`. Empty string = "no filter".
+
+# =============================== Open TP/SL parameter ===============================
+# Used both as a query response field on Order and as a request field
+# on CreateOrderParam / CreateOrderBatchDetail.
+@dataclass
+class OpenTpSlParam:
+    price: str = ""                                     # Order price, "0" or "" for market order
+    size: str = ""                                      # Order size
+    clientOrderId: str = ""                             # Client custom ID (for idempotency, max length 64)
+    triggerPriceType: Union[PriceType, int] = PriceType.UNSPECIFIED
+    triggerPrice: str = ""                              # Trigger price
+    expireTime: int = 0                                 # Expiration time, unit: milliseconds
 
 
 # Base response
@@ -20,8 +53,8 @@ class IndexerPageOffsetData:
 class KLine:
     klineId: str
     exchangeId: str
-    klineType: str
-    priceType: str
+    klineType: Union[KLineType, str]
+    priceType: Union[MarketPriceType, str]
     klineTime: int
     trades: str
     size: str
@@ -178,8 +211,8 @@ class GetExchangeListResponse:
 @dataclass
 class GetKLineReq:
     exchangeId: str
-    klineType: str
-    priceType: str
+    klineType: Union[KLineType, str]                    # see enums.KLineType
+    priceType: Union[MarketPriceType, str]              # see enums.MarketPriceType (string form)
     size: int = 100
     offsetData: str = ""
     filterBeginKlineTimeInclusive: int = 0
@@ -223,14 +256,16 @@ class GetFundingHistoryResp:
     data: GetFundingHistoryRespData
 
 
-# Trading queries (selected)
+# Trading queries
+# Field set is the authoritative one from api-gateway/api/def_order.api.
+
 @dataclass
 class GetActiveOrderReq:
     subaccountId: str
     size: int
-    offsetData: str = ""
     pageOffsetDataCreatedTime: str = ""
     pageOffsetDataItemId: str = ""
+    pageOffsetData: str = ""
     filterExchangeIdList: str = ""
     filterOrderStatusList: str = ""
     filterIsLiquidateList: str = ""
@@ -251,22 +286,22 @@ class Order:
     price: str
     size: str
     clientOrderId: str
-    timeInForce: int
+    timeInForce: Union[TimeInForce, int]
     reduceOnly: bool
     expireTime: int
     isPositionTp: bool
     isPositionSl: bool
     isLiquidate: bool
     isDeleverage: bool
-    triggerType: int
-    triggerPriceType: int
+    triggerType: Union[TriggerType, int]
+    triggerPriceType: Union[PriceType, int]
     triggerPrice: str
     openTpSlParentOrderId: str
     isSetOpenTp: bool
-    openTpParam: Dict[str, Any]
+    openTpParam: OpenTpSlParam
     isSetOpenSl: bool
-    openSlParam: Dict[str, Any]
-    marginMode: int
+    openSlParam: OpenTpSlParam
+    marginMode: Union[MarginMode, int]
     leverage: int
     takerFeeRatePpm: int
     makerFeeRatePpm: int
@@ -275,8 +310,8 @@ class Order:
     addOrderBookBlockTime: int
     addOrderBookTransactionIndex: str
     addOrderBookOperationIndex: str
-    status: int
-    cancelReason: int
+    status: Union[OrderStatus, int]
+    cancelReason: Union[OrderCancelReason, int]
     cumFillSize: str
     cumFillValue: str
     cumFillFee: str
@@ -302,8 +337,22 @@ class GetActiveOrderResp:
 
 
 @dataclass
-class GetHistoryOrderReq(GetActiveOrderReq):
-    pass
+class GetHistoryOrderReq:
+    subaccountId: str
+    size: int
+    pageOffsetDataCreatedTime: str = ""
+    pageOffsetDataItemId: str = ""
+    pageOffsetData: str = ""
+    filterExchangeIdList: str = ""
+    filterIsBuyList: str = ""
+    filterOrderStatusList: str = ""
+    filterIsLiquidateList: str = ""
+    filterIsDeleverageList: str = ""
+    filterIsPositionTpList: str = ""
+    filterIsPositionSlList: str = ""
+    filterOrderIdList: str = ""
+    filterStartCreatedTimeInclusive: int = 0
+    filterEndCreatedTimeExclusive: int = 0
 
 
 @dataclass
@@ -363,7 +412,7 @@ class PerpetualPosition:
     subaccountId: str
     coinId: str
     exchangeId: str
-    marginMode: int
+    marginMode: Union[MarginMode, int]
     openSize: str
     openValue: str
     openFee: str
@@ -422,4 +471,207 @@ class SendRawTxResponse:
     msg: str
     data: SendRawTxResponseData
 
+
+# =============================== Transaction detail (explorer) ===============================
+# Returned by GET /explorer/tx/{hash}. `block == 0` means the tx has not been
+# included on chain yet (still in mempool / async pending). `status == True`
+# means included AND executed successfully; `status == False` means included
+# but rejected at execution (errorCode tells you why).
+
+@dataclass
+class ChainTransactionDetail:
+    rawTx: str = ""
+    block: int = 0                       # 0 == pending / not yet included
+    hash: str = ""
+    fromAddress: str = ""                # JSON key is "from", aliased here
+    status: bool = False
+    error: Any = None
+    errorCode: int = 0
+    actionList: List[Any] = field(default_factory=list)
+    resultData: str = ""
+
+
+@dataclass
+class GetTransactionDetailResp:
+    code: str
+    msg: str
+    data: ChainTransactionDetail
+
+
+# =============================== Additional query request types ===============================
+# Mirrors of golang/types/trading.go GetXxxReq structs. All fields use camelCase
+# to match the HTTP query parameter names the gateway expects.
+
+@dataclass
+class GetPositionTransactionReq:
+    subaccountId: str
+    size: int
+    pageOffsetDataCreatedTime: str = ""
+    pageOffsetDataItemId: str = ""
+    pageOffsetData: str = ""
+    filterExchangeIdList: str = ""           # comma-separated exchange IDs
+    filterTypeList: str = ""                 # comma-separated transaction types
+    filterMarginModeList: str = ""           # comma-separated margin modes
+    filterStartCreatedTimeInclusive: int = 0
+    filterEndCreatedTimeExclusive: int = 0
+
+
+@dataclass
+class GetCollateralTransactionReq:
+    subaccountId: str
+    size: int
+    pageOffsetDataCreatedTime: str = ""
+    pageOffsetDataItemId: str = ""
+    pageOffsetData: str = ""
+    filterExchangeIdList: str = ""           # comma-separated exchange IDs
+    filterTypeList: str = ""                 # comma-separated transaction types
+    filterStartCreatedTimeInclusive: int = 0
+    filterEndCreatedTimeExclusive: int = 0
+
+
+@dataclass
+class GetAssetSnapshotReq:
+    subaccountId: str
+    size: int
+    pageOffsetDataCreatedTime: str = ""
+    pageOffsetDataItemId: str = ""
+    pageOffsetData: str = ""
+    filterCoinId: str = ""
+    filterTimeTag: Union[AssetSnapshotTimeTag, str] = ""   # see enums.AssetSnapshotTimeTag
+    filterStartCreatedTimeInclusive: int = 0
+    filterEndCreatedTimeExclusive: int = 0
+
+
+@dataclass
+class GetHistoryOrderFillTransactionReq:
+    subaccountId: str
+    size: int
+    pageOffsetDataCreatedTime: str = ""
+    pageOffsetDataItemId: str = ""
+    pageOffsetData: str = ""
+    filterExchangeIdList: str = ""
+    filterIsBuyList: str = ""
+    filterIsLiquidateList: str = ""
+    filterIsDeleverageList: str = ""
+    filterIsPositionTpList: str = ""
+    filterIsPositionSlList: str = ""
+    filterOrderIdList: str = ""
+    filterStartCreatedTimeInclusive: int = 0
+    filterEndCreatedTimeExclusive: int = 0
+
+
+@dataclass
+class GetHistoryPositionTermReq:
+    subaccountId: str
+    size: int
+    pageOffsetDataCreatedTime: str = ""
+    pageOffsetDataItemId: str = ""
+    pageOffsetData: str = ""
+    filterExchangeIdList: str = ""
+    filterStartCreatedTimeInclusive: int = 0
+    filterEndCreatedTimeExclusive: int = 0
+
+
+# =============================== Order / cancellation parameter types ===============================
+# Mirrors of golang/types/gateway.go (CreateOrderParam, CreateOrderBatchDetail,
+# CreateOrderBatchParam, CancelOrderParam, CancelOrderByClientIdParam,
+# CancelAllOrderParam, CloseAllPositionParam).
+#
+# Notes:
+# - subaccountId / exchangeId are Go uint64; in JSON / dict form they are
+#   typically passed as strings. The Python client does not coerce types, so
+#   pass whichever form the gateway accepts (str is the safer default).
+# - Price/size are split into a (scale, value) pair. value is the raw integer
+#   mantissa, scale is the decimal exponent (e.g. price = value * 10^scale).
+# - agentAddress is filled in by AntxClient automatically — leave it empty
+#   when constructing the dataclass.
+
+@dataclass
+class CreateOrderParam:
+    subaccountId: str = ""
+    exchangeId: str = ""
+    marginMode: Union[MarginMode, int] = MarginMode.UNSPECIFIED
+    leverage: int = 1
+    isBuy: bool = False
+    priceScale: int = 0
+    priceValue: int = 0
+    sizeScale: int = 0
+    sizeValue: int = 0
+    clientOrderId: str = ""
+    timeInForce: Union[TimeInForce, int] = TimeInForce.GOOD_TIL_CANCEL
+    reduceOnly: bool = False
+    expireTime: int = 0                      # ms since epoch
+    isMarket: bool = False
+    isPositionTp: bool = False
+    isPositionSl: bool = False
+    triggerType: Union[TriggerType, int] = TriggerType.UNSPECIFIED
+    triggerPriceType: Union[PriceType, int] = PriceType.UNSPECIFIED
+    triggerPriceValue: int = 0
+    openTpslParentOrderId: int = 0
+    isSetOpenTp: bool = False
+    openTpParam: Optional[OpenTpSlParam] = None
+    isSetOpenSl: bool = False
+    openSlParam: Optional[OpenTpSlParam] = None
+    agentAddress: str = ""                   # auto-filled by client
+
+
+@dataclass
+class CreateOrderBatchDetail:
+    isBuy: bool = False
+    priceScale: int = 0
+    priceValue: int = 0
+    sizeScale: int = 0
+    sizeValue: int = 0
+    clientOrderId: str = ""
+    timeInForce: Union[TimeInForce, int] = TimeInForce.GOOD_TIL_CANCEL
+    reduceOnly: bool = False
+    expireTime: int = 0
+    isMarket: bool = False
+    isPositionTp: bool = False
+    isPositionSl: bool = False
+    triggerType: Union[TriggerType, int] = TriggerType.UNSPECIFIED
+    triggerPriceType: Union[PriceType, int] = PriceType.UNSPECIFIED
+    triggerPriceValue: int = 0
+    isSetOpenTp: bool = False
+    openTpParam: Optional[OpenTpSlParam] = None
+    isSetOpenSl: bool = False
+    openSlParam: Optional[OpenTpSlParam] = None
+
+
+@dataclass
+class CreateOrderBatchParam:
+    subaccountId: str = ""
+    exchangeId: str = ""
+    marginMode: Union[MarginMode, int] = MarginMode.UNSPECIFIED
+    leverage: int = 1
+    createOrderParam: List[CreateOrderBatchDetail] = field(default_factory=list)
+    agentAddress: str = ""                   # auto-filled by client
+
+
+@dataclass
+class CancelOrderParam:
+    subaccountId: str = ""
+    orderIdList: List[str] = field(default_factory=list)
+    agentAddress: str = ""                   # auto-filled by client
+
+
+@dataclass
+class CancelOrderByClientIdParam:
+    subaccountId: str = ""
+    clientOrderIdList: List[str] = field(default_factory=list)
+    agentAddress: str = ""                   # auto-filled by client
+
+
+@dataclass
+class CancelAllOrderParam:
+    subaccountId: str = ""
+    filterExchangeIdList: List[str] = field(default_factory=list)
+    agentAddress: str = ""                   # auto-filled by client
+
+
+@dataclass
+class CloseAllPositionParam:
+    subaccountId: str = ""
+    filterExchangeIdList: List[str] = field(default_factory=list)
+    agentAddress: str = ""                   # auto-filled by client
 
